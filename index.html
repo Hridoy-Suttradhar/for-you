@@ -6,96 +6,186 @@
 <title>শুভ জন্মদিন 🎂</title>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
 <style>
-  :root { --bg1:#ffe3ec; --bg2:#e8d9ff; --ink:#3b2340; --accent:#e0457b; --card:rgba(255,255,255,.78); }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Hind Siliguri', sans-serif; color: var(--ink); min-height: 100vh;
-         background: linear-gradient(160deg, var(--bg1), var(--bg2)); background-attachment: fixed; overflow-x: hidden; }
-  section { max-width: 560px; margin: 0 auto; padding: 44px 20px; text-align: center; position: relative; z-index: 1; }
-  h1 { font-family: 'Pacifico', cursive; font-size: 2.3rem; color: var(--accent); line-height: 1.4; }
-  h2 { font-size: 1.5rem; margin-bottom: 18px; }
+  :root { --bg1:#ffe3ec; --bg2:#e8d9ff; --ink:#3b2340; --accent:#e0457b; --card:rgba(255,255,255,.8); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { font-family: 'Hind Siliguri', sans-serif; color: var(--ink); overflow-x: hidden;
+         background: linear-gradient(160deg, var(--bg1), var(--bg2)); background-attachment: fixed; }
+  h1 { font-family: 'Pacifico', cursive; font-size: 2.2rem; color: var(--accent); line-height: 1.5; }
+  h2 { font-size: 1.45rem; margin-bottom: 16px; }
   p { line-height: 1.9; }
-  .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 30px rgba(120,60,120,.12); backdrop-filter: blur(6px); }
-  .btn { display: inline-block; background: var(--accent); color: #fff; border: 0; border-radius: 999px;
-         padding: 14px 32px; font: 600 1.1rem 'Hind Siliguri', sans-serif; cursor: pointer; box-shadow: 0 6px 18px rgba(224,69,123,.4); }
-  .btn:active { transform: scale(.96); }
   .hidden { display: none !important; }
 
-  #lock { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  /* scenes: একবারে একটাই দেখা যায় */
+  .scene { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+           padding: 24px 20px 84px; text-align: center; overflow-y: auto; opacity: 0; pointer-events: none;
+           transition: opacity .7s ease; z-index: 2; }
+  .scene.active { opacity: 1; pointer-events: auto; }
+  .inner { width: 100%; max-width: 520px; margin: auto; }
+
+  .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 30px rgba(120,60,120,.12); backdrop-filter: blur(6px); }
+  .btn { display: inline-block; background: var(--accent); color: #fff; border: 0; border-radius: 999px;
+         padding: 13px 30px; font: 600 1.08rem 'Hind Siliguri', sans-serif; cursor: pointer; box-shadow: 0 6px 18px rgba(224,69,123,.4); margin-top: 18px; }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #fff; color: var(--accent); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+  .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  /* progress dots */
+  #dots { position: fixed; bottom: 22px; left: 0; right: 0; display: flex; gap: 7px; justify-content: center; z-index: 5; pointer-events: none; }
+  #dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(224,69,123,.25); transition: .4s; }
+  #dots i.on { background: var(--accent); transform: scale(1.35); }
+
+  /* mute button */
+  #mute { position: fixed; top: 14px; right: 14px; z-index: 6; width: 42px; height: 42px; border-radius: 50%; border: 0;
+          background: rgba(255,255,255,.85); font-size: 1.2rem; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+
+  /* timer */
   .timer { display: flex; gap: 8px; justify-content: center; margin: 24px 0; }
   .timer div { background: var(--card); border-radius: 14px; padding: 12px 8px; min-width: 66px; font-size: .85rem; }
   .timer b { display: block; font-size: 1.8rem; color: var(--accent); }
 
+  /* envelope */
+  .envelope { width: 230px; height: 150px; margin: 22px auto; position: relative; background: #f7c6d8; border-radius: 8px;
+              box-shadow: 0 10px 30px rgba(120,60,120,.25); cursor: pointer; animation: bob 2.4s ease-in-out infinite; }
+  .envelope::before { content: ""; position: absolute; inset: 0; border-radius: 8px;
+      background: linear-gradient(to bottom right, transparent 49.5%, #eeaec6 50%) left/50% 100% no-repeat,
+                  linear-gradient(to bottom left, transparent 49.5%, #eeaec6 50%) right/50% 100% no-repeat; }
+  .envelope .flap { position: absolute; top: 0; left: 0; width: 100%; height: 75px; background: #e88aae;
+      clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .8s; }
+  .envelope .seal { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); font-size: 1.8rem; z-index: 2; }
+  .envelope.open { animation: none; }
+  .envelope.open .flap { transform: rotateX(180deg); }
+  @keyframes bob { 50% { transform: translateY(-8px); } }
+
+  /* cake */
+  .cake { position: relative; width: 220px; margin: 30px auto 10px; }
+  .candles { display: flex; justify-content: space-around; padding: 0 30px; height: 62px; align-items: flex-end; }
+  .candle { width: 11px; height: 36px; background: linear-gradient(#fff, #ffd1e1); border-radius: 3px; position: relative; }
+  .flame { position: absolute; top: -22px; left: 50%; width: 14px; height: 20px; margin-left: -7px;
+           background: radial-gradient(circle at 50% 70%, #fff3a0, #ffb100 60%, transparent 70%);
+           border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; animation: flick .25s infinite alternate; transition: opacity .5s, transform .5s; }
+  .candle.out .flame { opacity: 0; transform: translateY(-14px) scale(.3); }
+  @keyframes flick { to { transform: scale(1.1) rotate(4deg); } }
+  .tier1 { height: 52px; background: #f8a8c4; border-radius: 12px 12px 0 0; }
+  .tier2 { height: 62px; background: #ef7fa8; border-radius: 0 0 12px 12px; margin-top: -2px; }
+  .plate { height: 12px; width: 250px; margin: 0 -15px; background: #fff; border-radius: 50%; box-shadow: 0 6px 12px rgba(0,0,0,.1); }
+  #wishLine { min-height: 60px; }
+
+  /* counter */
   .counter { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
   .counter div { background: #fff; border-radius: 14px; padding: 14px 6px; }
-  .counter b { display: block; font-size: 1.7rem; color: var(--accent); }
+  .counter b { display: block; font-size: 1.8rem; color: var(--accent); }
 
-  .tl-item { margin-bottom: 26px; }
-  .tl-item img { width: 100%; border-radius: 16px; max-height: 420px; object-fit: cover; background: #f3dbe6; margin-bottom: 4px; }
-  .tl-item small { color: var(--accent); font-weight: 700; display: block; margin: 8px 0 2px; }
+  /* photos */
+  #photoImg { width: 100%; border-radius: 16px; max-height: 52vh; object-fit: cover; background: #f3dbe6; transition: opacity .35s; }
+  #photoDate { color: var(--accent); font-weight: 700; margin-top: 12px; }
+  .fade { opacity: 0; }
 
-  #reason { min-height: 100px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; }
-  .count { color: var(--accent); font-weight: 700; margin-top: 12px; }
+  #reason { min-height: 120px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; transition: opacity .3s; }
+  .count { color: var(--accent); font-weight: 700; margin-top: 10px; }
 
-  #final-msg { white-space: pre-line; text-align: left; font-size: 1.1rem; line-height: 2; }
-  audio { width: 100%; margin-top: 12px; }
+  audio { width: 100%; margin-top: 14px; }
+  #final-msg { white-space: pre-line; text-align: left; font-size: 1.08rem; line-height: 2; }
 
-  .heart { position: fixed; bottom: -30px; font-size: 20px; opacity: .7; animation: floatUp linear forwards; pointer-events: none; z-index: 0; }
+  .heart { position: fixed; bottom: -30px; font-size: 20px; opacity: .7; animation: floatUp linear forwards; pointer-events: none; z-index: 1; }
   @keyframes floatUp { to { transform: translateY(-110vh) rotate(25deg); opacity: 0; } }
 </style>
 </head>
 <body>
 
-<!-- ============ LOCK SCREEN (২৬ নভেম্বর রাত ১২টায় খুলবে) ============ -->
-<div id="lock" class="hidden"><section>
+<button id="mute" class="hidden" aria-label="গান বন্ধ/চালু">🔊</button>
+<div id="dots"></div>
+
+<!-- 0. LOCK -->
+<div class="scene" id="s-lock"><div class="inner">
   <h1>একটু অপেক্ষা... 🤫</h1>
   <p style="margin-top:12px">বৃষভানু, তোমার জন্য একটা surprise আছে।<br>২৬ নভেম্বর রাত ১২টায় খুলবে।</p>
   <div class="timer" id="timer"></div>
-</section></div>
+</div></div>
 
-<!-- ============ MAIN SITE ============ -->
-<main id="site" class="hidden">
+<!-- 1. ENVELOPE -->
+<div class="scene" id="s-envelope"><div class="inner">
+  <p>বৃষভানু,</p>
+  <h2 style="margin-top:6px">এটা শুধু তোমার জন্য</h2>
+  <div class="envelope" id="envelope"><div class="flap"></div><div class="seal">💌</div></div>
+  <p id="envHint">খামটা চাপো</p>
+</div></div>
 
-  <section>
-    <h1>শুভ জন্মদিন,<br>বৃষভানু 🎂</h1>
-    <p style="margin-top:16px">একুশ বছরের তুমিকে নিয়ে ছোট্ট একটা উপহার।<br>নিচে scroll করো 💌</p>
-  </section>
-
-  <section>
-    <h2>কথা শুরু হওয়ার পর থেকে</h2>
-    <div class="card">
-      <p>৬ আগস্ট ২০২৫-এর সেই reply থেকে...</p>
-      <div class="counter" id="counter"></div>
+<!-- 2. CAKE -->
+<div class="scene" id="s-cake"><div class="inner">
+  <h2>মনে মনে একটা ইচ্ছে করো 🌟</h2>
+  <div class="cake">
+    <div class="candles">
+      <div class="candle"><div class="flame"></div></div>
+      <div class="candle"><div class="flame"></div></div>
+      <div class="candle"><div class="flame"></div></div>
     </div>
-  </section>
+    <div class="tier1"></div><div class="tier2"></div><div class="plate"></div>
+  </div>
+  <div id="wishLine">
+    <button class="btn" id="blowBtn">ফুঁ দাও 🕯️</button>
+  </div>
+  <h1 id="hbd" class="hidden">শুভ জন্মদিন,<br>বৃষভানু 🎂</h1>
+  <button class="btn hidden" data-next>পরের ধাপ →</button>
+</div></div>
 
-  <section>
-    <h2>আমাদের গল্প 📸</h2>
-    <div id="timeline"></div>
-  </section>
+<!-- 3. COUNTER -->
+<div class="scene" id="s-counter"><div class="inner">
+  <h2>কথা শুরু হওয়ার পর থেকে</h2>
+  <div class="card">
+    <p>৬ আগস্ট ২০২৫-এর সেই reply থেকে এখন পর্যন্ত...</p>
+    <div class="counter" id="counter"></div>
+  </div>
+  <button class="btn" data-next>পরের ধাপ →</button>
+</div></div>
 
-  <section id="songSec">
-    <h2>তোমার প্রিয় গান 🎵</h2>
+<!-- 4. PHOTOS -->
+<div class="scene" id="s-photos"><div class="inner">
+  <h2>আমাদের গল্প 📸</h2>
+  <div class="card">
+    <img id="photoImg" alt="">
+    <div id="photoDate"></div>
+    <p id="photoText"></p>
+  </div>
+  <div class="row">
+    <button class="btn ghost" id="prevPhoto">← আগের</button>
+    <button class="btn" id="nextPhoto">পরের →</button>
+  </div>
+</div></div>
+
+<!-- 5. REASONS -->
+<div class="scene" id="s-reasons"><div class="inner">
+  <h2>তোমাকে ভালোবাসার ২১টা কারণ ✨</h2>
+  <div class="card"><p id="reason">নিচের button-এ চাপো</p></div>
+  <div class="count" id="count"></div>
+  <button class="btn" id="reasonBtn">প্রথম কারণ</button>
+</div></div>
+
+<!-- 6. HER SONG -->
+<div class="scene" id="s-song"><div class="inner">
+  <h2>তোমার প্রিয় গান 🎵</h2>
+  <div class="card">
+    <p>যে গানটা তুমি প্রায়ই আমাকে শোনাতে।</p>
+    <audio id="song" controls preload="metadata" src="audio/song.mp3"></audio>
+  </div>
+  <button class="btn" data-next>পরের ধাপ →</button>
+</div></div>
+
+<!-- 7. VOICE + LETTER -->
+<div class="scene" id="s-final"><div class="inner">
+  <div id="voiceBox">
+    <h2>আমার গলায় একটা ছোট্ট কথা 🎧</h2>
     <div class="card">
-      <p>যে গানটা তুমি প্রায়ই আমাকে শোনাতে।</p>
-      <audio id="song" controls preload="none" src="audio/song.mp3"></audio>
+      <p>Headphone থাকলে লাগিয়ে নিও।</p>
+      <audio id="voice" controls preload="metadata" src="audio/voice.mp3"></audio>
     </div>
-  </section>
+  </div>
+  <button class="btn" id="finalBtn">Tai? 🙈</button>
+  <div class="card hidden" id="finalCard" style="margin-top:20px"><p id="final-msg"></p></div>
+</div></div>
 
-  <section>
-    <h2>তোমাকে ভালোবাসার ২১টা কারণ ✨</h2>
-    <div class="card"><p id="reason">নিচের button-এ চাপো</p></div>
-    <div class="count" id="count"></div>
-    <br>
-    <button class="btn" id="reasonBtn">পরের কারণ</button>
-  </section>
-
-  <section>
-    <h2>শেষে একটা কথা...</h2>
-    <button class="btn" id="finalBtn">Tai? 🙈</button>
-    <div class="card hidden" id="finalCard" style="margin-top:22px"><p id="final-msg"></p></div>
-  </section>
-
-</main>
+<!-- bgm: audio/bgm.mp3 (না থাকলে চলবে, শুধু গান থাকবে না) -->
+<audio id="bgm" loop preload="auto" src="audio/bgm.mp3"></audio>
 
 <script>
 /* =====================================================
@@ -104,8 +194,8 @@
 const CONFIG = {
   startDate: "2025-08-06",
   unlockAt: "2026-11-26T00:00:00+06:00",   // জন্মদিনের রাত ১২:০০ (বাংলাদেশ সময়)
+  bgmVolume: 0.22,                          // background গানের জোর (০ থেকে ১)
 
-  // ছবি: photos/ folder-এ 1.jpg ... 9.jpg নামে রাখো
   timeline: [
     { img: "photos/1.jpg", date: "Airtel Adda Concert, চবি",
       text: "এই রাতটা আমার জীবনের turning point। এখান থেকেই সবকিছুর শুরু।" },
@@ -127,7 +217,6 @@ const CONFIG = {
       text: "মিরপুর, বোটানিক্যাল গার্ডেন। গাছের ছায়ায় সেই বিকেলটা থেমে থাকলেই ভালো হতো।" }
   ],
 
-  // ২১ বছর = ২১টা কারণ
   reasons: [
     "তুমি আমার story-তে reply করেছিলে, তাই।",
     "তুমি conservative, আর ঠিক এই কারণেই তোমাকে এত আপন মনে হয়।",
@@ -172,60 +261,163 @@ const CONFIG = {
 
 /* ===================== কোড (বদলাতে হবে না) ===================== */
 const $ = id => document.getElementById(id);
-const preview = new URLSearchParams(location.search).has("preview"); // ?preview দিলে লক ছাড়া দেখা যাবে
+const preview = new URLSearchParams(location.search).has("preview"); // ?preview = লক ছাড়া test
 
-function hearts() {
+/* ---------- ভেসে ওঠা heart / confetti ---------- */
+function floaty(list) {
   const h = document.createElement("div");
   h.className = "heart";
-  h.textContent = ["❤️","💖","🌸","✨"][Math.floor(Math.random()*4)];
+  h.textContent = list[Math.floor(Math.random()*list.length)];
   h.style.left = Math.random()*100 + "vw";
-  h.style.animationDuration = (6 + Math.random()*6) + "s";
+  h.style.fontSize = (16 + Math.random()*16) + "px";
+  h.style.animationDuration = (5 + Math.random()*6) + "s";
   document.body.appendChild(h);
   setTimeout(() => h.remove(), 12000);
 }
+const hearts = () => floaty(["❤️","💖","🌸","✨"]);
+const confetti = (n = 60) => { for (let i = 0; i < n; i++) setTimeout(() => floaty(["🎉","🎊","✨","💖","🌸","🎂"]), i*40); };
 
-function startSite() {
-  $("lock").classList.add("hidden");
-  $("site").classList.remove("hidden");
-  setInterval(hearts, 800);
+/* ---------- audio ---------- */
+const bgm = $("bgm"), song = $("song"), voice = $("voice");
+let muted = false, bgmOK = true;
+bgm.volume = CONFIG.bgmVolume;
+bgm.addEventListener("error", () => { bgmOK = false; $("mute").classList.add("hidden"); }, true);
 
-  const start = new Date(CONFIG.startDate + "T00:00:00+06:00");
-  function tick() {
-    const diff = Date.now() - start.getTime();
-    const d = Math.floor(diff/86400000), h = Math.floor(diff/3600000)%24, m = Math.floor(diff/60000)%60;
-    $("counter").innerHTML = `<div><b>${d}</b>দিন</div><div><b>${h}</b>ঘণ্টা</div><div><b>${m}</b>মিনিট</div>`;
-  }
-  tick(); setInterval(tick, 30000);
-
-  $("timeline").innerHTML = CONFIG.timeline.map(t =>
-    `<div class="tl-item card"><img src="${t.img}" alt="" loading="lazy">
-     <small>${t.date}</small><p>${t.text}</p></div>`).join("");
-
-  // গানের ফাইল না থাকলে অংশটা লুকিয়ে যাবে
-  $("song").addEventListener("error", () => $("songSec").classList.add("hidden"), true);
-
-  let i = 0;
-  $("reasonBtn").onclick = () => {
-    const n = CONFIG.reasons.length;
-    $("reason").textContent = CONFIG.reasons[i % n];
-    $("count").textContent = (i % n + 1) + " / " + n;
-    i++;
-    for (let k = 0; k < 5; k++) hearts();
-  };
-
-  $("finalBtn").onclick = () => {
-    $("finalBtn").classList.add("hidden");
-    $("finalCard").classList.remove("hidden");
-    $("final-msg").textContent = CONFIG.finalMessage;
-    for (let k = 0; k < 40; k++) setTimeout(hearts, k*60);
-  };
+function startBgm() {
+  if (!bgmOK) return;
+  bgm.play().then(() => $("mute").classList.remove("hidden")).catch(() => {});
 }
+$("mute").onclick = () => {
+  muted = !muted;
+  bgm.muted = muted;
+  $("mute").textContent = muted ? "🔇" : "🔊";
+};
+// তার গান বা আমার voice চললে background গান থেমে যাবে, শেষ হলে আবার চলবে
+[song, voice].forEach(a => {
+  a.addEventListener("play",  () => bgm.pause());
+  a.addEventListener("pause", () => { if (bgmOK && started && !song.playing && !voice.playing) bgm.play().catch(()=>{}); });
+  a.addEventListener("ended", () => { if (bgmOK && started) bgm.play().catch(()=>{}); });
+});
+Object.defineProperty(HTMLMediaElement.prototype, "playing", { get() { return !this.paused && !this.ended && this.readyState > 2; } });
+
+/* ---------- দৃশ্য (scene) ব্যবস্থা ---------- */
+const order = ["s-envelope","s-cake","s-counter","s-photos","s-reasons","s-song","s-final"];
+const missing = new Set();
+let started = false, cur = -1;
+
+song.addEventListener("error", () => missing.add("s-song"), true);
+voice.addEventListener("error", () => $("voiceBox").classList.add("hidden"), true);
+
+function buildDots() {
+  $("dots").innerHTML = order.map(() => "<i></i>").join("");
+}
+function show(id) {
+  document.querySelectorAll(".scene").forEach(s => s.classList.toggle("active", s.id === id));
+  const idx = order.indexOf(id);
+  document.querySelectorAll("#dots i").forEach((d, i) => d.classList.toggle("on", i === idx));
+  $("dots").classList.toggle("hidden", idx < 0);
+}
+function goTo(i) {
+  while (i < order.length && missing.has(order[i])) i++;
+  if (i >= order.length) return;
+  cur = i;
+  show(order[i]);
+  if (order[i] === "s-photos") renderPhoto(0, true);
+  if (order[i] === "s-final") setTimeout(() => confetti(25), 600);
+}
+const next = () => goTo(cur + 1);
+document.querySelectorAll("[data-next]").forEach(b => b.addEventListener("click", next));
+
+/* ---------- 1. envelope ---------- */
+$("envelope").onclick = () => {
+  if (started) return;
+  started = true;
+  $("envelope").classList.add("open");
+  $("envHint").textContent = "💌";
+  startBgm();
+  for (let k = 0; k < 15; k++) setTimeout(hearts, k*80);
+  setTimeout(next, 1400);
+};
+
+/* ---------- 2. cake ---------- */
+$("blowBtn").onclick = () => {
+  const cs = [...document.querySelectorAll(".candle")];
+  cs.forEach((c, i) => setTimeout(() => c.classList.add("out"), i*350));
+  $("blowBtn").classList.add("hidden");
+  setTimeout(() => {
+    confetti(70);
+    $("hbd").classList.remove("hidden");
+    document.querySelector("#s-cake [data-next]").classList.remove("hidden");
+  }, 1300);
+};
+
+/* ---------- 3. counter ---------- */
+const start = new Date(CONFIG.startDate + "T00:00:00+06:00");
+function tick() {
+  const diff = Date.now() - start.getTime();
+  const d = Math.floor(diff/86400000), h = Math.floor(diff/3600000)%24, m = Math.floor(diff/60000)%60;
+  $("counter").innerHTML = `<div><b>${d}</b>দিন</div><div><b>${h}</b>ঘণ্টা</div><div><b>${m}</b>মিনিট</div>`;
+}
+tick(); setInterval(tick, 20000);
+
+/* ---------- 4. photos ---------- */
+let p = 0;
+function renderPhoto(i, instant) {
+  p = Math.max(0, Math.min(CONFIG.timeline.length - 1, i));
+  const t = CONFIG.timeline[p];
+  const apply = () => {
+    $("photoImg").src = t.img;
+    $("photoDate").textContent = t.date;
+    $("photoText").textContent = t.text;
+    $("photoImg").classList.remove("fade");
+  };
+  if (instant) apply(); else { $("photoImg").classList.add("fade"); setTimeout(apply, 280); }
+  $("prevPhoto").style.visibility = p === 0 ? "hidden" : "visible";
+  $("nextPhoto").textContent = p === CONFIG.timeline.length - 1 ? "পরের ধাপ →" : "পরের →";
+}
+$("prevPhoto").onclick = () => renderPhoto(p - 1);
+$("nextPhoto").onclick = () => {
+  if (p === CONFIG.timeline.length - 1) next(); else renderPhoto(p + 1);
+};
+
+/* ---------- 5. reasons ---------- */
+let r = 0;
+$("reasonBtn").onclick = () => {
+  const n = CONFIG.reasons.length;
+  $("reason").style.opacity = 0;
+  setTimeout(() => {
+    $("reason").textContent = CONFIG.reasons[r];
+    $("reason").style.opacity = 1;
+    $("count").textContent = (r + 1) + " / " + n;
+    r++;
+    if (r < n) $("reasonBtn").textContent = "পরের কারণ";
+    else {
+      $("reasonBtn").textContent = "পরের ধাপ →";
+      $("reasonBtn").onclick = next;
+    }
+  }, 250);
+  for (let k = 0; k < 5; k++) hearts();
+};
+
+/* ---------- 7. final ---------- */
+$("finalBtn").onclick = () => {
+  $("finalBtn").classList.add("hidden");
+  $("finalCard").classList.remove("hidden");
+  $("final-msg").textContent = CONFIG.finalMessage;
+  confetti(80);
+  document.querySelector("#s-final .inner").scrollIntoView({ block: "start", behavior: "smooth" });
+};
+
+/* ---------- শুরু / লক ---------- */
+buildDots();
+setInterval(() => { if (started) hearts(); }, 1400);
 
 const unlock = new Date(CONFIG.unlockAt).getTime();
+function begin() { goTo(0); }
 if (preview || Date.now() >= unlock) {
-  startSite();
+  begin();
 } else {
-  $("lock").classList.remove("hidden");
+  show("s-lock");
   const t = setInterval(() => {
     const left = unlock - Date.now();
     if (left <= 0) { clearInterval(t); location.reload(); return; }
