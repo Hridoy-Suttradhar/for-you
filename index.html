@@ -69,18 +69,40 @@
   .night .timer div { background: rgba(255,255,255,.1); }
   .night .timer b { color: #ffc2da; }
 
-  /* envelope */
-  .envelope { width: 230px; height: 150px; margin: 22px auto; position: relative; background: #f7c6d8; border-radius: 8px;
-              box-shadow: 0 10px 30px rgba(120,60,120,.25); cursor: pointer; animation: bob 2.4s ease-in-out infinite; }
-  .envelope::before { content: ""; position: absolute; inset: 0; border-radius: 8px;
-      background: linear-gradient(to bottom right, transparent 49.5%, #eeaec6 50%) left/50% 100% no-repeat,
-                  linear-gradient(to bottom left, transparent 49.5%, #eeaec6 50%) right/50% 100% no-repeat; }
-  .envelope .flap { position: absolute; top: 0; left: 0; width: 100%; height: 75px; background: #e88aae;
-      clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .8s; }
-  .envelope .seal { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); font-size: 1.8rem; z-index: 2; }
-  .envelope.open { animation: none; }
-  .envelope.open .flap { transform: rotateX(180deg); }
-  @keyframes bob { 50% { transform: translateY(-8px); } }
+  /* ---------- খাম ---------- */
+  #s-envelope { overflow: hidden; }
+  #s-envelope .to { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .env { position: relative; width: 280px; height: 188px; margin: 112px auto 34px; cursor: pointer;
+         animation: bob 2.6s ease-in-out infinite; filter: drop-shadow(0 18px 22px rgba(150,50,100,.35)); }
+  .env.open { animation: none; }
+  .env-glow { position: absolute; left: 50%; top: 50%; width: 360px; height: 360px; margin: -180px 0 0 -180px; border-radius: 50%;
+              background: radial-gradient(circle, rgba(255,214,120,.65), rgba(255,160,200,.25) 45%, transparent 70%);
+              animation: pulseGlow 2.6s ease-in-out infinite alternate; pointer-events: none; z-index: -1; }
+  .env.open .env-glow { animation: none; opacity: 1; transform: scale(1.35); transition: transform 1.2s, opacity 1.2s; }
+  @keyframes pulseGlow { from { transform: scale(.85); opacity: .55; } to { transform: scale(1.08); opacity: 1; } }
+  @keyframes bob { 50% { transform: translateY(-9px); } }
+  .env-back { position: absolute; inset: 0; border-radius: 12px; background: linear-gradient(160deg, #f6bad0, #e58bb0); }
+  .env-letter { position: absolute; left: 7%; top: 8%; width: 86%; height: 84%; z-index: 2; border-radius: 8px;
+                background: linear-gradient(#fffdf6, #fff3df); box-shadow: 0 2px 8px rgba(0,0,0,.15);
+                display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+                transition: transform 1.1s cubic-bezier(.2,.9,.3,1.1) .55s; color: #b3365f; }
+  .env-letter span { font-size: 2rem; }
+  .env-letter b { font-size: 1.3rem; font-weight: 700; }
+  .env.open .env-letter { transform: translateY(-84px) scale(1.03); }
+  .env-front { position: absolute; inset: 0; z-index: 3; border-radius: 12px; pointer-events: none;
+               background: linear-gradient(170deg, #f9c6da, #ea96b8); clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%); }
+  .env-front::after { content: ""; position: absolute; inset: 0; background:
+      linear-gradient(to bottom right, transparent 49.4%, rgba(160,50,100,.18) 49.6%, transparent 50.4%) left/50% 100% no-repeat,
+      linear-gradient(to bottom left, transparent 49.4%, rgba(160,50,100,.18) 49.6%, transparent 50.4%) right/50% 100% no-repeat; }
+  .env-flap { position: absolute; left: 0; top: 0; width: 100%; height: 58%; z-index: 4; transform-origin: 50% 0; pointer-events: none;
+              background: linear-gradient(#e87fa6, #d9668f); clip-path: polygon(0 0, 100% 0, 50% 100%);
+              transition: transform .7s ease, z-index 0s .35s; }
+  .env.open .env-flap { transform: rotateX(180deg); z-index: 1; }
+  .env-seal { position: absolute; left: 50%; top: 56%; width: 46px; height: 46px; margin: -23px 0 0 -23px; z-index: 5; border-radius: 50%;
+              background: radial-gradient(circle at 35% 30%, #ff6f8e, #c2183f 70%); color: #ffe1ea; font-size: 1.35rem;
+              display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(120,10,40,.55), inset 0 -3px 5px rgba(0,0,0,.25);
+              transition: transform .5s, opacity .5s; pointer-events: none; }
+  .env.open .env-seal { transform: scale(1.8); opacity: 0; }
 
   /* ---------- কেক ---------- */
   .cakeWrap { position: relative; width: 100%; max-width: 340px; margin: 6px auto 0; }
@@ -167,10 +189,17 @@
 
 <!-- 1. খাম -->
 <div class="scene" id="s-envelope"><div class="inner">
-  <p>বৃষভানু,</p>
+  <p class="to">বৃষভানু,</p>
   <h2 style="margin-top:6px">এটা শুধু তোমার জন্য</h2>
-  <div class="envelope" id="envelope"><div class="flap"></div><div class="seal">💌</div></div>
-  <p id="envHint">খামটা চাপো</p>
+  <div class="env" id="envelope">
+    <div class="env-glow"></div>
+    <div class="env-back"></div>
+    <div class="env-letter"><span>💌</span><b>শুভ জন্মদিন</b></div>
+    <div class="env-front"></div>
+    <div class="env-flap"></div>
+    <div class="env-seal">❤</div>
+  </div>
+  <p id="envHint">খামটা চাপো ✨</p>
 </div></div>
 
 <!-- 2. কেক -->
@@ -271,7 +300,10 @@
 const CONFIG = {
   startDate: "2025-08-06",
   unlockAt: "2026-11-26T00:00:00+06:00",   // জন্মদিনের রাত ১২:০০ (বাংলাদেশ সময়)
-  bgmVolume: 1, counterVolume: 0.5,                          // background গানের জোর (০ থেকে ১)
+  bgmVolume: 1,          // background গানের জোর (০ থেকে ১)
+  counterVolume: 0.8,    // ঘড়ির ধাপে (টিক শোনার জন্য একটু কম)
+  bgmBoost: 1.8,         // গান আরও জোরে চাইলে বাড়াও (১ = আসল জোর, ২.৫ পর্যন্ত নিরাপদ)
+  sfxVolume: 1,          // খাম খোলা আর কেক কাটার শব্দের জোর
 
   timeline: [
     { img: "photos/1.jpg", short: "সেই কনসার্ট", date: "Airtel Adda Concert, চবি",
@@ -397,21 +429,58 @@ function tickSound(high) {
   o.type = "square"; o.frequency.value = high ? 1900 : 1350;
   f.type = "bandpass"; f.frequency.value = high ? 2300 : 1700; f.Q.value = 4;
   g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.22, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.32, t + 0.004);
   g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
   o.connect(f); f.connect(g); g.connect(c.destination);
   o.start(t); o.stop(t + 0.08);
 }
+// কেক কাটার পর: জোরালো chime + ঢাক + ঝলমলে শব্দ
 function chime() {
   if (muted) return;
-  const c = ctx(), now = c.currentTime;
-  [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((fr, i) => {
-    const o = c.createOscillator(), g = c.createGain(), t = now + i*0.13;
-    o.type = "sine"; o.frequency.value = fr;
+  const c = ctx(), now = c.currentTime, V = CONFIG.sfxVolume;
+  const comp = c.createDynamicsCompressor(); comp.connect(c.destination);
+  [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568, 2093].forEach((fr, i) => {
+    ["sine", "triangle"].forEach((type, k) => {
+      const o = c.createOscillator(), g = c.createGain(), t = now + 0.15 + i*0.11;
+      o.type = type; o.frequency.value = fr * (k ? 2 : 1);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime((k ? 0.12 : 0.42)*V, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+      o.connect(g); g.connect(comp); o.start(t); o.stop(t + 1.6);
+    });
+  });
+  thump(now, 0.9*V, comp); thump(now + 0.5, 0.7*V, comp);
+  sparkleNoise(now + 0.1, 1.2, 0.5*V, comp);
+}
+function thump(t, vol, dest) {
+  const c = ctx(), o = c.createOscillator(), g = c.createGain();
+  o.type = "sine"; o.frequency.setValueAtTime(170, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.25);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+  o.connect(g); g.connect(dest || c.destination); o.start(t); o.stop(t + 0.4);
+}
+function sparkleNoise(t, dur, vol, dest) {
+  const c = ctx(), len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random()*2 - 1) * (1 - i/len);
+  const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  s.buffer = buf; f.type = "bandpass"; f.Q.value = 1.2;
+  f.frequency.setValueAtTime(500, t); f.frequency.exponentialRampToValueAtTime(5200, t + dur*.9);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f); f.connect(g); g.connect(dest || c.destination); s.start(t);
+}
+// খাম খোলার জোরালো শব্দ: ধপ + বাতাসের ঝাপটা + উজ্জ্বল সুর
+function sfxOpen() {
+  if (muted) return;
+  const c = ctx(), now = c.currentTime, V = CONFIG.sfxVolume;
+  const comp = c.createDynamicsCompressor(); comp.connect(c.destination);
+  thump(now, 1.0*V, comp);
+  sparkleNoise(now + 0.05, 0.9, 0.7*V, comp);
+  [659.25, 830.6, 987.77, 1318.5, 1661.2, 1975.5].forEach((fr, i) => {
+    const o = c.createOscillator(), g = c.createGain(), t = now + 0.35 + i*0.09;
+    o.type = "triangle"; o.frequency.value = fr;
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.16, t + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
-    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 1.2);
+    g.gain.exponentialRampToValueAtTime(0.5*V, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+    o.connect(g); g.connect(comp); o.start(t); o.stop(t + 1.4);
   });
 }
 
@@ -422,6 +491,18 @@ bgm.volume = CONFIG.bgmVolume;
 bgm.addEventListener("error", () => { bgmOK = false; $("mute").classList.add("hidden"); }, true);
 const setBgmVol = v => { bgm.volume = v; };
 
+// গান আসল জোরের চেয়েও বেশি করতে Web Audio gain (শুধু https/http পাতায়, file:// এ নীরব হয়ে যেতে পারে)
+let boosted = false;
+function boostBgm() {
+  if (boosted || !/^https?:$/.test(location.protocol) || CONFIG.bgmBoost <= 1) return;
+  try {
+    const c = ctx(), src = c.createMediaElementSource(bgm), g = c.createGain(), lim = c.createDynamicsCompressor();
+    g.gain.value = CONFIG.bgmBoost;
+    lim.threshold.value = -6; lim.knee.value = 8; lim.ratio.value = 12;   // বেশি জোরে ফাটা ঠেকায়
+    src.connect(g); g.connect(lim); lim.connect(c.destination);
+    boosted = true;
+  } catch (e) {}
+}
 function startBgm() {
   if (!bgmOK) return;
   bgmOn = true;
@@ -448,7 +529,7 @@ $("mute").onclick = () => {
 Object.defineProperty(HTMLMediaElement.prototype, "playing", { get() { return !this.paused && !this.ended && this.readyState > 2; } });
 // ওর গান বা আমার voice চললে background সুর থামবে, শেষ হলে আবার চলবে
 [song, voice].forEach(a => {
-  a.addEventListener("play",  () => bgm.pause());
+  a.addEventListener("play",  () => { if (!a.muted) bgm.pause(); });   // নিঃশব্দ "অনুমতি-নেওয়া" play-তে সুর থামে না
   a.addEventListener("pause", () => { if (bgmOK && bgmOn && !song.playing && !voice.playing) bgm.play().catch(()=>{}); });
   a.addEventListener("ended", () => { if (bgmOK && bgmOn) bgm.play().catch(()=>{}); });
 });
@@ -528,8 +609,9 @@ function goTo(i, force) {
   show(id);
   if (leaving === "s-counter" && id !== "s-counter") fadeBgm(CONFIG.bgmVolume);
   if (id === "s-counter") {
-    // background সুর শুরু হয় এই ধাপ থেকেই, এরপর শেষ পর্যন্ত loop-এ চলে
-    if (!bgmOn) { setBgmVol(CONFIG.counterVolume); startBgm(); } else fadeBgm(CONFIG.counterVolume, 800);
+    // সুর খাম খোলার সময়ই শুরু হয়েছে, এই ধাপে শুধু টিক শোনার জন্য একটু নামে
+    if (!bgmOn) startBgm();
+    fadeBgm(CONFIG.counterVolume, 800);
     secondTick();
   }
   if (id === "s-voice") tryPlayVoice();      // কেক শেষ হলে voice নিজে থেকে শুরু
@@ -549,12 +631,16 @@ $("envelope").onclick = () => {
   if (started) return;
   started = true;
   ctx();                                  // শব্দ চালুর অনুমতি আগেই নিয়ে রাখা
+  boostBgm();
   $("envelope").classList.add("open");
   $("envHint").textContent = "💌";
-  unlockVoice();
-  unlockBgm();
-  for (let k = 0; k < 15; k++) setTimeout(hearts, k*80);
-  setTimeout(next, 1400);
+  unlockVoice();                          // পরে voice নিজে থেকে চালানোর অনুমতি
+  setBgmVol(CONFIG.bgmVolume);
+  startBgm();                             // background সুর এখন থেকেই শুরু
+  sfxOpen();
+  fireworks(4);
+  for (let k = 0; k < 25; k++) setTimeout(hearts, k*70);
+  setTimeout(next, 2800);
 };
 
 /* ---------- 2. কেক (২১টা মোমবাতি) ---------- */
