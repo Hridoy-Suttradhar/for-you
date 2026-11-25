@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>শুভ জন্মদিন 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root { --bg1:#ffe3ec; --bg2:#e8d9ff; --ink:#3b2340; --accent:#e0457b; --card:rgba(255,255,255,.8); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { font-family: 'Hind Siliguri', sans-serif; color: var(--ink); overflow-x: hidden;
+         background: linear-gradient(160deg, var(--bg1), var(--bg2)); background-attachment: fixed; }
+  h1 { font-family: 'Pacifico', cursive; font-size: 2.1rem; color: var(--accent); line-height: 1.5; }
+  h2 { font-size: 1.4rem; margin-bottom: 14px; }
+  p { line-height: 1.9; }
+  .hidden { display: none !important; }
+  .hint { font-size: .9rem; opacity: .8; margin-bottom: 10px; }
+
+  /* ---------- রাতের পটভূমি (কেক, voice, ঘড়ি, ছবির দেয়াল) ---------- */
+  #nightBg { position: fixed; inset: 0; z-index: 0; opacity: 0; transition: opacity 1.2s ease; pointer-events: none;
+    background:
+      radial-gradient(circle at 12% 14%, #fff 0, transparent 1.6px),
+      radial-gradient(circle at 78% 9%,  #fff 0, transparent 1.4px),
+      radial-gradient(circle at 45% 26%, #fff 0, transparent 1.2px),
+      radial-gradient(circle at 90% 38%, #fff 0, transparent 1.6px),
+      radial-gradient(circle at 20% 52%, #fff 0, transparent 1.2px),
+      radial-gradient(circle at 66% 62%, #fff 0, transparent 1.4px),
+      radial-gradient(circle at 8%  80%, #fff 0, transparent 1.3px),
+      radial-gradient(circle at 84% 86%, #fff 0, transparent 1.5px),
+      linear-gradient(180deg, #0a0a22, #1b0f38 60%, #2d1346); animation: twinkle 4s ease-in-out infinite alternate; }
+  body.dark #nightBg { opacity: 1; }
+  @keyframes twinkle { to { filter: brightness(1.25); } }
+
+  .scene { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+           padding: 24px 20px 84px; text-align: center; overflow-y: auto; opacity: 0; pointer-events: none;
+           transition: opacity .8s ease; z-index: 2; }
+  .scene.active { opacity: 1; pointer-events: auto; }
+  .inner { width: 100%; max-width: 520px; margin: auto; }
+  .inner.wide { max-width: 560px; }
+
+  .scene.night { color: #f6e9ff; }
+  .night h1 { color: #ffc2da; text-shadow: 0 0 18px rgba(255,150,200,.55); }
+  .night .card { background: rgba(255,255,255,.09); box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+  .night .btn.ghost { background: rgba(255,255,255,.14); color: #ffd9e8; box-shadow: none; }
+
+  .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 30px rgba(120,60,120,.12); backdrop-filter: blur(6px); }
+  .btn { display: inline-block; background: var(--accent); color: #fff; border: 0; border-radius: 999px;
+         padding: 13px 28px; font: 600 1.06rem 'Hind Siliguri', sans-serif; cursor: pointer; box-shadow: 0 6px 18px rgba(224,69,123,.4); margin: 14px 5px 0; }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #fff; color: var(--accent); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+  .row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+
+  #dots { position: fixed; bottom: 22px; left: 0; right: 0; display: flex; gap: 7px; justify-content: center; z-index: 5; pointer-events: none; }
+  #dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(224,69,123,.3); transition: .4s; }
+  #dots i.on { background: var(--accent); transform: scale(1.35); }
+  body.dark #dots i { background: rgba(255,255,255,.3); }
+  body.dark #dots i.on { background: #ffc2da; }
+
+  #mute { right: 14px; }
+  #back { left: 14px; }
+  #mute, #back { position: fixed; top: 14px; z-index: 6; width: 42px; height: 42px; border-radius: 50%; border: 0;
+          background: rgba(255,255,255,.85); font-size: 1.2rem; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+
+  /* lock */
+  .timer { display: flex; gap: 8px; justify-content: center; margin: 24px 0; }
+  .timer div { background: var(--card); border-radius: 14px; padding: 12px 8px; min-width: 66px; font-size: .85rem; }
+  .timer b { display: block; font-size: 1.8rem; color: var(--accent); }
+  .night .timer div { background: rgba(255,255,255,.1); }
+  .night .timer b { color: #ffc2da; }
+
+  /* ---------- খাম ---------- */
+  #s-envelope { overflow: hidden; }
+  #s-envelope .to { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .env { position: relative; width: 280px; height: 188px; margin: 112px auto 34px; cursor: pointer;
+         animation: bob 2.6s ease-in-out infinite; filter: drop-shadow(0 18px 22px rgba(150,50,100,.35)); }
+  .env.open { animation: none; }
+  .env-glow { position: absolute; left: 50%; top: 50%; width: 360px; height: 360px; margin: -180px 0 0 -180px; border-radius: 50%;
+              background: radial-gradient(circle, rgba(255,214,120,.65), rgba(255,160,200,.25) 45%, transparent 70%);
+              animation: pulseGlow 2.6s ease-in-out infinite alternate; pointer-events: none; z-index: -1; }
+  .env.open .env-glow { animation: none; opacity: 1; transform: scale(1.35); transition: transform 1.2s, opacity 1.2s; }
+  @keyframes pulseGlow { from { transform: scale(.85); opacity: .55; } to { transform: scale(1.08); opacity: 1; } }
+  @keyframes bob { 50% { transform: translateY(-9px); } }
+  .env-back { position: absolute; inset: 0; border-radius: 12px; background: linear-gradient(160deg, #f6bad0, #e58bb0); }
+  .env-letter { position: absolute; left: 7%; top: 8%; width: 86%; height: 84%; z-index: 2; border-radius: 8px;
+                background: linear-gradient(#fffdf6, #fff3df); box-shadow: 0 2px 8px rgba(0,0,0,.15);
+                display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+                transition: transform 1.1s cubic-bezier(.2,.9,.3,1.1) .55s; color: #b3365f; }
+  .env-letter span { font-size: 2rem; }
+  .env-letter b { font-size: 1.3rem; font-weight: 700; }
+  .env.open .env-letter { transform: translateY(-84px) scale(1.03); }
+  .env-front { position: absolute; inset: 0; z-index: 3; border-radius: 12px; pointer-events: none;
+               background: linear-gradient(170deg, #f9c6da, #ea96b8); clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%); }
+  .env-front::after { content: ""; position: absolute; inset: 0; background:
+      linear-gradient(to bottom right, transparent 49.4%, rgba(160,50,100,.18) 49.6%, transparent 50.4%) left/50% 100% no-repeat,
+      linear-gradient(to bottom left, transparent 49.4%, rgba(160,50,100,.18) 49.6%, transparent 50.4%) right/50% 100% no-repeat; }
+  .env-flap { position: absolute; left: 0; top: 0; width: 100%; height: 58%; z-index: 4; transform-origin: 50% 0; pointer-events: none;
+              background: linear-gradient(#e87fa6, #d9668f); clip-path: polygon(0 0, 100% 0, 50% 100%);
+              transition: transform .7s ease, z-index 0s .35s; }
+  .env.open .env-flap { transform: rotateX(180deg); z-index: 1; }
+  .env-seal { position: absolute; left: 50%; top: 56%; width: 46px; height: 46px; margin: -23px 0 0 -23px; z-index: 5; border-radius: 50%;
+              background: radial-gradient(circle at 35% 30%, #ff6f8e, #c2183f 70%); color: #ffe1ea; font-size: 1.35rem;
+              display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(120,10,40,.55), inset 0 -3px 5px rgba(0,0,0,.25);
+              transition: transform .5s, opacity .5s; pointer-events: none; }
+  .env.open .env-seal { transform: scale(1.8); opacity: 0; }
+
+  /* ---------- কেক ---------- */
+  .cakeWrap { position: relative; width: 100%; max-width: 340px; margin: 6px auto 0; }
+  #cakeGlow { position: absolute; inset: -40px; pointer-events: none; --lit: 1; transition: opacity 1s;
+              background: radial-gradient(circle at 50% 38%, rgba(255,190,90,calc(.5 * var(--lit))), transparent 62%); }
+  #cakeSvg { position: relative; width: 100%; height: auto; overflow: visible; }
+  .candle { cursor: pointer; }
+  .fl { transform-box: fill-box; transform-origin: 50% 100%; animation: flick .28s infinite alternate ease-in-out; transition: opacity .45s, transform .45s; }
+  .candle.out .fl { animation: none; opacity: 0; transform: translateY(-6px) scale(.2); }
+  @keyframes flick { from { transform: scale(1,1) rotate(-3deg); } to { transform: scale(1.12,1.08) rotate(3deg); } }
+  .smoke { transform-box: fill-box; transform-origin: center; animation: smoke 2.2s ease-out forwards; }
+  @keyframes smoke { from { opacity: .7; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-38px) scale(3); } }
+  #blowStatus { min-height: 26px; font-size: .95rem; margin-top: 10px; opacity: .9; }
+  #hbd { animation: glowPulse 2.2s ease-in-out infinite alternate; margin-top: 8px; }
+  @keyframes glowPulse { from { text-shadow: 0 0 10px rgba(255,150,200,.4); transform: scale(1); } to { text-shadow: 0 0 28px rgba(255,190,120,.9); transform: scale(1.04); } }
+  #fx { position: fixed; inset: 0; z-index: 15; pointer-events: none; }
+
+  /* ---------- voice ---------- */
+  .eq { display: flex; gap: 5px; justify-content: center; align-items: flex-end; height: 46px; margin: 8px 0 14px; }
+  .eq i { width: 6px; height: 10px; background: #ffc2da; border-radius: 3px; }
+  .eq.on i { animation: eq .9s ease-in-out infinite alternate; }
+  .eq.on i:nth-child(2) { animation-delay: .15s; } .eq.on i:nth-child(3) { animation-delay: .3s; }
+  .eq.on i:nth-child(4) { animation-delay: .1s; }  .eq.on i:nth-child(5) { animation-delay: .25s; }
+  @keyframes eq { to { height: 42px; } }
+  audio { width: 100%; margin-top: 12px; }
+
+  /* ---------- ঘড়ি + counter ---------- */
+  #clock { width: 150px; height: 150px; margin: 4px auto 14px; display: block; filter: drop-shadow(0 0 14px rgba(255,170,210,.4)); }
+  .counter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+  .counter div { background: rgba(255,255,255,.1); border-radius: 14px; padding: 12px 4px; font-size: .85rem; }
+  .counter b { display: block; font-size: 1.5rem; color: #ffc2da; }
+
+  /* ---------- ছবির দেয়াল (fairy light + polaroid) ---------- */
+  #wall { margin: 4px 0 6px; }
+  .string { position: relative; margin-bottom: 8px; }
+  .wire { position: absolute; top: 0; left: -3%; width: 106%; height: 30px; overflow: visible; }
+  .wire .bulbs { filter: drop-shadow(0 0 5px #ffcf6a); animation: bulbs 2.6s ease-in-out infinite alternate; }
+  @keyframes bulbs { from { opacity: .55; } to { opacity: 1; } }
+  .polas { display: flex; justify-content: space-around; padding-top: 12px; position: relative; }
+  .pola { width: 29%; background: #fffdf8; padding: 5px 5px 4px; border: 0; border-radius: 3px; cursor: pointer; position: relative;
+          box-shadow: 0 8px 16px rgba(0,0,0,.45); transform-origin: 50% -10px; --r: 0deg;
+          transform: rotate(var(--r)); animation: sway 4.2s ease-in-out infinite alternate; color: #5a3b4a; font-family: inherit; }
+  .pola:nth-child(2) { margin-top: 5px; }
+  .pola::before { content: ""; position: absolute; top: -11px; left: 50%; width: 9px; height: 17px; margin-left: -4.5px;
+                  background: linear-gradient(#e2b073, #c58d4f); border-radius: 2px; box-shadow: 0 2px 3px rgba(0,0,0,.35); }
+  .pola img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #e9d9e1; }
+  .pola span { display: block; font-size: .66rem; line-height: 1.3; padding: 5px 0 3px; font-weight: 600; }
+  @keyframes sway { from { transform: rotate(calc(var(--r) - 1.6deg)); } to { transform: rotate(calc(var(--r) + 1.6deg)); } }
+  .pola:active { transform: rotate(var(--r)) scale(.96); animation: none; }
+
+  #lb { position: fixed; inset: 0; z-index: 20; background: rgba(8,5,20,.88); display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .lb-card { background: #fffdf8; color: #4a2f3d; border-radius: 6px; padding: 12px 12px 16px; width: 100%; max-width: 420px; text-align: center;
+             box-shadow: 0 20px 60px rgba(0,0,0,.6); position: relative; max-height: 92vh; overflow-y: auto; animation: pop .3s ease; }
+  @keyframes pop { from { transform: scale(.88) rotate(-2deg); opacity: 0; } }
+  #lbImg { width: 100%; max-height: 52vh; object-fit: contain; background: #f1e4ea; display: block; }
+  #lbDate { color: var(--accent); font-weight: 700; margin-top: 12px; }
+  #lbText { font-size: 1rem; line-height: 1.8; padding: 0 4px; }
+  #lbClose { position: absolute; top: -14px; right: -6px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 1rem; cursor: pointer; }
+
+  /* reasons */
+  #reason { min-height: 120px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; transition: opacity .3s; }
+  .count { color: var(--accent); font-weight: 700; margin-top: 10px; }
+  #final-msg { white-space: pre-line; text-align: left; font-size: 1.08rem; line-height: 2; }
+
+  .heart { position: fixed; bottom: -30px; font-size: 20px; opacity: .7; animation: floatUp linear forwards; pointer-events: none; z-index: 1; }
+  @keyframes floatUp { to { transform: translateY(-110vh) rotate(25deg); opacity: 0; } }
+</style>
+</head>
+<body>
+
+<div id="nightBg"></div>
+<canvas id="fx"></canvas>
+<button id="mute" class="hidden" aria-label="গান বন্ধ/চালু">🔊</button>
+<button id="back" class="hidden" aria-label="আগের ধাপ">←</button>
+<div id="dots"></div>
+
+<!-- 0. LOCK -->
+<div class="scene night" id="s-lock"><div class="inner">
+  <h1>একটু অপেক্ষা... 🤫</h1>
+  <p style="margin-top:12px">বৃষভানু, তোমার জন্য একটা surprise আছে।<br>২৬ নভেম্বর রাত ১২টায় খুলবে।</p>
+  <div class="timer" id="timer"></div>
+  <button class="btn ghost" id="lockSound">🔔 টিক টিক শব্দ চালু করো</button>
+</div></div>
+
+<!-- 1. খাম -->
+<div class="scene" id="s-envelope"><div class="inner">
+  <p class="to">বৃষভানু,</p>
+  <h2 style="margin-top:6px">এটা শুধু তোমার জন্য</h2>
+  <div class="env" id="envelope">
+    <div class="env-glow"></div>
+    <div class="env-back"></div>
+    <div class="env-letter"><span>💌</span><b>শুভ জন্মদিন</b></div>
+    <div class="env-front"></div>
+    <div class="env-flap"></div>
+    <div class="env-seal">❤</div>
+  </div>
+  <p id="envHint">খামটা চাপো ✨</p>
+</div></div>
+
+<!-- 2. কেক -->
+<div class="scene night" id="s-cake"><div class="inner">
+  <h2>মনে মনে একটা ইচ্ছে করো 🌟</h2>
+  <p class="hint">২১টা মোমবাতি, ২১টা স্বপ্ন</p>
+  <div class="cakeWrap"><div id="cakeGlow"></div><svg id="cakeSvg" viewBox="0 0 320 290"></svg></div>
+  <div id="blowArea">
+    <div class="row">
+      <button class="btn" id="micBtn">🎤 সত্যি সত্যি ফুঁ দেবো</button>
+      <button class="btn ghost" id="blowBtn">👆 চাপ দিয়ে নেভাও</button>
+    </div>
+    <div id="blowStatus"></div>
+  </div>
+  <h1 id="hbd" class="hidden">শুভ জন্মদিন,<br>বৃষভানু 🎂</h1>
+  <button class="btn hidden" id="cakeNext">পরের ধাপ →</button>
+</div></div>
+
+<!-- 3. আমার voice -->
+<div class="scene night" id="s-voice"><div class="inner">
+  <h2>আমার গলায় একটা ছোট্ট কথা 🎧</h2>
+  <div class="card">
+    <p>Headphone লাগিয়ে শোনো 🎧<br>নিজে থেকে না চললে play চাপো।</p>
+    <div class="eq" id="eq"><i></i><i></i><i></i><i></i><i></i></div>
+    <audio id="voice" controls preload="metadata" src="audio/voice.mp3"></audio>
+  </div>
+  <button class="btn" id="voiceNext">পরের ধাপ →</button>
+</div></div>
+
+<!-- 4. ঘড়ি + counter -->
+<div class="scene night" id="s-counter"><div class="inner">
+  <h2>টিক টিক... সময় গুনছি ⏳</h2>
+  <svg id="clock" viewBox="-50 -50 100 100">
+    <circle r="47" fill="rgba(255,255,255,.07)" stroke="#ffc2da" stroke-width="1.6"/>
+    <g id="marks"></g>
+    <line id="hH" y2="-22" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    <line id="hM" y2="-34" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+    <line id="hS" y2="-40" y1="6" stroke="#ff7aa8" stroke-width="1"/>
+    <circle r="2.4" fill="#ff7aa8"/>
+  </svg>
+  <div class="card">
+    <p>৬ আগস্ট ২০২৫-এর সেই reply থেকে এখন পর্যন্ত...</p>
+    <div class="counter" id="counter"></div>
+  </div>
+  <button class="btn" data-next>পরের ধাপ →</button>
+</div></div>
+
+<!-- 5. ছবির দেয়াল -->
+<div class="scene night" id="s-photos"><div class="inner wide">
+  <h2>আমাদের গল্প 📸</h2>
+  <p class="hint">প্রতিটা ছবিতে একটু চেপে দেখো</p>
+  <div id="wall"></div>
+  <button class="btn" data-next>পরের ধাপ →</button>
+</div></div>
+
+<!-- 6. কারণ -->
+<div class="scene" id="s-reasons"><div class="inner">
+  <h2>তোমাকে ভালোবাসার ২১টা কারণ ✨</h2>
+  <div class="card"><p id="reason">নিচের button-এ চাপো</p></div>
+  <div class="count" id="count"></div>
+  <button class="btn" id="reasonBtn">প্রথম কারণ</button>
+</div></div>
+
+<!-- 7. ওর গান -->
+<div class="scene" id="s-song"><div class="inner">
+  <h2>তোমার প্রিয় গান 🎵</h2>
+  <div class="card">
+    <p>যে গানটা তুমি প্রায়ই আমাকে শোনাতে।</p>
+    <audio id="song" controls preload="metadata" src="audio/song.mp3"></audio>
+  </div>
+  <button class="btn" data-next>পরের ধাপ →</button>
+</div></div>
+
+<!-- 8. চিঠি -->
+<div class="scene" id="s-final"><div class="inner">
+  <h2>শেষে একটা কথা...</h2>
+  <button class="btn" id="finalBtn">Tai? 🙈</button>
+  <div class="card hidden" id="finalCard" style="margin-top:20px"><p id="final-msg"></p></div>
+  <div><button class="btn ghost hidden" id="replayBtn">↺ আবার দেখো</button></div>
+</div></div>
+
+<!-- lightbox -->
+<div id="lb" class="hidden"><div class="lb-card">
+  <button id="lbClose">✕</button>
+  <img id="lbImg" alt="">
+  <div id="lbDate"></div>
+  <p id="lbText"></p>
+  <div class="row"><button class="btn ghost" id="lbPrev" style="color:#e0457b;background:#fde8f0">← আগের</button>
+  <button class="btn" id="lbNext">পরের →</button></div>
+</div></div>
+
+<audio id="bgm" loop preload="auto" src="audio/bgm.mp3"></audio>
+
+<script>
+/* =====================================================
+   ✏️ লেখা বদলাতে চাইলে শুধু এই CONFIG অংশটুকু বদলাও
+   ===================================================== */
+const CONFIG = {
+  startDate: "2025-08-06",
+  unlockAt: "2026-11-26T00:00:00+06:00",   // জন্মদিনের রাত ১২:০০ (বাংলাদেশ সময়)
+  bgmVolume: 1,          // background গানের জোর (০ থেকে ১)
+  counterVolume: 0.8,    // ঘড়ির ধাপে (টিক শোনার জন্য একটু কম)
+  bgmBoost: 1.8,         // গান আরও জোরে চাইলে বাড়াও (১ = আসল জোর, ২.৫ পর্যন্ত নিরাপদ)
+  sfxVolume: 1,          // খাম খোলা আর কেক কাটার শব্দের জোর
+
+  timeline: [
+    { img: "photos/1.jpg", short: "সেই কনসার্ট", date: "Airtel Adda Concert, চবি",
+      text: "এই রাতটা আমার জীবনের turning point। এখান থেকেই সবকিছুর শুরু।" },
+    { img: "photos/2.jpg", short: "সেই Story", date: "৬ আগস্ট ২০২৫ · সেই Story",
+      text: "কনসার্টের ছবি দিয়েছিলাম story-তে, আর তুমি reply করলে: \"কী অবস্থা তোমার?\" তুমি সিনিয়র, আমি জুনিয়র। ঐ এক লাইন থেকেই আমাদের কথা শুরু।" },
+    { img: "photos/3.jpg", short: "১৪ সেপ্টেম্বর", date: "১৪ সেপ্টেম্বর ২০২৫",
+      text: "ভোর হলেই এই ফুল নিয়ে যেতাম, সিনিয়রকে impress করার চেষ্টায়। কাজ হয়েছিল কিনা, সেটা তুমিই জানো 😄" },
+    { img: "photos/4.jpg", short: "ছোটবেলা", date: "তোমার ছোটবেলা",
+      text: "এই ছোট্ট মেয়েটাই একদিন ডাক্তার হবে। তাকে আমি অনেক আগে থেকেই চিনি, এমন মনে হয়।" },
+    { img: "photos/5.jpg", short: "প্রথম শীত", date: "ডিসেম্বর ২০২৫ · আমাদের প্রথম শীত",
+      text: "কথা বলতে বলতে প্রথম যে শীতটা এল, সেটা তোমার কথায় গরম ছিল।" },
+    { img: "photos/6.jpg", short: "সরস্বতী পূজা", date: "জানুয়ারি ২০২৬ · প্রথম সরস্বতী পূজা",
+      text: "একসাথে না থেকেও যে উৎসব একসাথে কাটানো যায়, সেটা শিখেছি এই দিনে।" },
+    { img: "photos/7.jpg", short: "প্রথম দেখা", date: "৯ মার্চ ২০২৬ · প্রথম দেখা",
+      text: "ঢাকা সায়েন্স ল্যাব মোড়, রিকশা, রমনার পথে। রিকশায় উঠে তুমি আমার হাত ধরেছিলে। ঐ অনুভূতিটা আমি আজও ভুলিনি।" },
+    { img: "photos/8.jpg", short: "প্রথম খাবার 🍜", date: "প্রথম দেখার প্রথম খাবার 🍜",
+      text: "তুমি আমার জন্য নিজের হাতে নুডলস রান্না করে এনেছিলে। ওটাই আমার জীবনের সবচেয়ে মিষ্টি নুডলস।" },
+    { img: "photos/9.jpg", short: "দ্বিতীয় দেখা", date: "আমাদের দ্বিতীয় দেখা",
+      text: "মিরপুর, বোটানিক্যাল গার্ডেন। গাছের ছায়ায় সেই বিকেলটা থেমে থাকলেই ভালো হতো।" }
+  ],
+
+  reasons: [
+    "তুমি আমার story-তে reply করেছিলে, তাই।",
+    "তুমি conservative, আর ঠিক এই কারণেই তোমাকে এত আপন মনে হয়।",
+    "প্রশংসা শুনলে তুমি যেভাবে হাসো, ওই হাসিটা দেখার জন্যই আমি আরও প্রশংসা খুঁজি।",
+    "নেইলপালিশের রঙ তুমি যত্ন করে বাছো। ছোট জিনিসেও তোমার সৌন্দর্যবোধ আমার ভালো লাগে।",
+    "ভর্তার প্রতি তোমার ভালোবাসা। সাধারণ জিনিসে সুখ খুঁজে নেওয়ার ক্ষমতা তোমার আছে।",
+    "মন্দিরে গেলে তোমার ভেতরের শান্তিটা যেন আরও স্পষ্ট হয়।",
+    "প্রথম দেখায় রিকশায় তুমি আমার হাত ধরেছিলে।",
+    "প্রথম দেখায় আমার জন্য নিজে রান্না করে নুডলস এনেছিলে।",
+    "তোমার \"Tai?\" reply। এই ছোট্ট শব্দেই আমি পুরো তোমাকে শুনতে পাই।",
+    "বিয়ের কার্ডে junior ছাপানোর তোমার হুমকি। ঠাট্টাটাই আমার সবচেয়ে প্রিয় ভবিষ্যৎ 😄",
+    "যে গানটা তুমি আমাকে শোনাতে, সেটা এখন আমার কাছে তোমার গলার মতো।",
+    "MBBS-এর এত চাপেও তুমি স্বপ্ন ছাড়োনি।",
+    "তুমি ডাক্তার হবে, আর সেই গল্পের প্রথম দর্শক হতে পারা আমার গর্ব।",
+    "ঢাকা আর চট্টগ্রামের মাঝখানে এত দূরত্ব, তবু তুমি কাছে লাগো।",
+    "তুমি আমাকে \"junior\" ডাকো। এই এক শব্দে আদর লুকিয়ে থাকে।",
+    "কথা বলতে বলতে কখন যে সম্পর্ক হয়ে গেল, টেরই পাইনি। এত স্বাভাবিক তুমি।",
+    "আমার ক্লান্ত দিনগুলো তোমার দু'লাইনেই হালকা হয়ে যায়।",
+    "তুমি যেমন আছো, তেমনই যথেষ্ট।",
+    "তুমি আমার প্রথম শীত, প্রথম সরস্বতী পূজা, প্রথম অনেক কিছুর সঙ্গী।",
+    "তুমি আমার অনেক ভাবনার মাঝে সবচেয়ে শান্ত জায়গা।",
+    "কারণ তুমি তুমি, আমার বৃষভানু।"
+  ],
+
+  finalMessage:
+`বৃষভানু,
+
+আজ তোমার একুশ বছর পূর্ণ হলো।
+
+তুমি আমার জীবনে এসেছিলে এক দমকা হাওয়ার মতো। এসে সব এলোমেলো করে দিয়ে গেছ, আর আমি সেই এলোমেলোর ভেতরেই সবচেয়ে বেশি গুছিয়ে উঠেছি।
+
+একটা কনসার্টের রাত, একটা story-র reply, একটা রিকশায় ধরা হাত। এইটুকু দিয়েই আমার পুরো পৃথিবীটা নতুন করে সাজানো হয়ে গেল।
+
+আজকের দিনে আমার একটাই চাওয়া: তুমি সবসময় নিজের যত্ন নিও। সময়মতো খেয়ো, ঘুমিয়ো, আর নিজেকে গুছিয়ে রেখো। তুমি ভালো থাকলে আমার সব ভালো।
+
+আমি অনেক দূরে, চট্টগ্রামে। কিন্তু আজকের এই রাতে, আর প্রতিটা রাতে, তুমি আমার খুব কাছে।
+
+শুভ জন্মদিন, আমার সবচেয়ে প্রিয় মানুষ। 🎂❤️
+
+— তোমার junior`
+};
+
+/* ===================== কোড (বদলাতে হবে না) ===================== */
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const preview = params.has("preview");   // ?preview = লক ছাড়া test
+
+/* ---------- ভেসে ওঠা heart / confetti ---------- */
+function floaty(list) {
+  const h = document.createElement("div");
+  h.className = "heart";
+  h.textContent = list[Math.floor(Math.random()*list.length)];
+  h.style.left = Math.random()*100 + "vw";
+  h.style.fontSize = (16 + Math.random()*16) + "px";
+  h.style.animationDuration = (5 + Math.random()*6) + "s";
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 12000);
+}
+const hearts = () => floaty(["❤️","💖","🌸","✨"]);
+const confetti = (n = 60) => { for (let i = 0; i < n; i++) setTimeout(() => floaty(["🎉","🎊","✨","💖","🌸","🎂"]), i*40); };
+
+/* ---------- আতশবাজি ---------- */
+const fx = $("fx"), fctx = fx.getContext("2d");
+let parts = [], fxRun = false;
+function sizeFx() { fx.width = innerWidth; fx.height = innerHeight; }
+addEventListener("resize", sizeFx); sizeFx();
+function burst(x, y) {
+  const hue = Math.random()*360;
+  for (let i = 0; i < 46; i++) {
+    const a = Math.random()*Math.PI*2, s = 2 + Math.random()*4.5;
+    parts.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: 1, h: hue + Math.random()*40 });
+  }
+  if (!fxRun) { fxRun = true; requestAnimationFrame(stepFx); }
+}
+function stepFx() {
+  fctx.clearRect(0, 0, fx.width, fx.height);
+  parts = parts.filter(p => p.life > 0);
+  for (const p of parts) {
+    p.x += p.vx; p.y += p.vy; p.vy += .06; p.vx *= .99; p.life -= .012;
+    fctx.globalAlpha = Math.max(p.life, 0);
+    fctx.fillStyle = `hsl(${p.h},90%,65%)`;
+    fctx.beginPath(); fctx.arc(p.x, p.y, 2.2, 0, 6.283); fctx.fill();
+  }
+  if (parts.length) requestAnimationFrame(stepFx); else { fxRun = false; fctx.clearRect(0, 0, fx.width, fx.height); }
+}
+function fireworks(n = 8) {
+  for (let i = 0; i < n; i++) setTimeout(() => burst(innerWidth*(.15 + Math.random()*.7), innerHeight*(.12 + Math.random()*.4)), i*330);
+}
+
+/* ---------- শব্দ (Web Audio: ঘড়ির টিক, chime) ---------- */
+let actx = null, muted = false;
+function ctx() {
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
+function tickSound(high) {
+  if (muted) return;
+  const c = ctx(), t = c.currentTime;
+  const o = c.createOscillator(), g = c.createGain(), f = c.createBiquadFilter();
+  o.type = "square"; o.frequency.value = high ? 1900 : 1350;
+  f.type = "bandpass"; f.frequency.value = high ? 2300 : 1700; f.Q.value = 4;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.32, t + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+  o.connect(f); f.connect(g); g.connect(c.destination);
+  o.start(t); o.stop(t + 0.08);
+}
+// কেক কাটার পর: জোরালো chime + ঢাক + ঝলমলে শব্দ
+function chime() {
+  if (muted) return;
+  const c = ctx(), now = c.currentTime, V = CONFIG.sfxVolume;
+  const comp = c.createDynamicsCompressor(); comp.connect(c.destination);
+  [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568, 2093].forEach((fr, i) => {
+    ["sine", "triangle"].forEach((type, k) => {
+      const o = c.createOscillator(), g = c.createGain(), t = now + 0.15 + i*0.11;
+      o.type = type; o.frequency.value = fr * (k ? 2 : 1);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime((k ? 0.12 : 0.42)*V, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+      o.connect(g); g.connect(comp); o.start(t); o.stop(t + 1.6);
+    });
+  });
+  thump(now, 0.9*V, comp); thump(now + 0.5, 0.7*V, comp);
+  sparkleNoise(now + 0.1, 1.2, 0.5*V, comp);
+}
+function thump(t, vol, dest) {
+  const c = ctx(), o = c.createOscillator(), g = c.createGain();
+  o.type = "sine"; o.frequency.setValueAtTime(170, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.25);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+  o.connect(g); g.connect(dest || c.destination); o.start(t); o.stop(t + 0.4);
+}
+function sparkleNoise(t, dur, vol, dest) {
+  const c = ctx(), len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random()*2 - 1) * (1 - i/len);
+  const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  s.buffer = buf; f.type = "bandpass"; f.Q.value = 1.2;
+  f.frequency.setValueAtTime(500, t); f.frequency.exponentialRampToValueAtTime(5200, t + dur*.9);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f); f.connect(g); g.connect(dest || c.destination); s.start(t);
+}
+// খাম খোলার জোরালো শব্দ: ধপ + বাতাসের ঝাপটা + উজ্জ্বল সুর
+function sfxOpen() {
+  if (muted) return;
+  const c = ctx(), now = c.currentTime, V = CONFIG.sfxVolume;
+  const comp = c.createDynamicsCompressor(); comp.connect(c.destination);
+  thump(now, 1.0*V, comp);
+  sparkleNoise(now + 0.05, 0.9, 0.7*V, comp);
+  [659.25, 830.6, 987.77, 1318.5, 1661.2, 1975.5].forEach((fr, i) => {
+    const o = c.createOscillator(), g = c.createGain(), t = now + 0.35 + i*0.09;
+    o.type = "triangle"; o.frequency.value = fr;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.5*V, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+    o.connect(g); g.connect(comp); o.start(t); o.stop(t + 1.4);
+  });
+}
+
+/* ---------- audio ফাইল ---------- */
+const bgm = $("bgm"), song = $("song"), voice = $("voice");
+let bgmOK = true, started = false, bgmOn = false;
+bgm.volume = CONFIG.bgmVolume;
+bgm.addEventListener("error", () => { bgmOK = false; $("mute").classList.add("hidden"); }, true);
+const setBgmVol = v => { bgm.volume = v; };
+
+// গান আসল জোরের চেয়েও বেশি করতে Web Audio gain (শুধু https/http পাতায়, file:// এ নীরব হয়ে যেতে পারে)
+let boosted = false;
+function boostBgm() {
+  if (boosted || !/^https?:$/.test(location.protocol) || CONFIG.bgmBoost <= 1) return;
+  try {
+    const c = ctx(), src = c.createMediaElementSource(bgm), g = c.createGain(), lim = c.createDynamicsCompressor();
+    g.gain.value = CONFIG.bgmBoost;
+    lim.threshold.value = -6; lim.knee.value = 8; lim.ratio.value = 12;   // বেশি জোরে ফাটা ঠেকায়
+    src.connect(g); g.connect(lim); lim.connect(c.destination);
+    boosted = true;
+  } catch (e) {}
+}
+function startBgm() {
+  if (!bgmOK) return;
+  bgmOn = true;
+  bgm.play().catch(() => {});
+}
+bgm.addEventListener("playing", () => $("mute").classList.remove("hidden"));
+function fadeBgm(target, ms = 1600) {
+  clearInterval(fadeBgm.t);
+  const from = bgm.volume, steps = 16, dt = ms/steps; let i = 0;
+  fadeBgm.t = setInterval(() => {
+    i++; bgm.volume = Math.min(1, Math.max(0, from + (target - from)*i/steps));
+    if (i >= steps) clearInterval(fadeBgm.t);
+  }, dt);
+}
+// কোনো কারণে সুর না চললে পরের ছোঁয়ায় চালু হবে
+document.addEventListener("click", () => {
+  if (bgmOn && bgm.paused && !song.playing && !voice.playing) bgm.play().catch(() => {});
+});
+$("mute").onclick = () => {
+  muted = !muted;
+  bgm.muted = muted;
+  $("mute").textContent = muted ? "🔇" : "🔊";
+};
+Object.defineProperty(HTMLMediaElement.prototype, "playing", { get() { return !this.paused && !this.ended && this.readyState > 2; } });
+// ওর গান বা আমার voice চললে background সুর থামবে, শেষ হলে আবার চলবে
+[song, voice].forEach(a => {
+  a.addEventListener("play",  () => { if (!a.muted) bgm.pause(); });   // নিঃশব্দ "অনুমতি-নেওয়া" play-তে সুর থামে না
+  a.addEventListener("pause", () => { if (bgmOK && bgmOn && !song.playing && !voice.playing) bgm.play().catch(()=>{}); });
+  a.addEventListener("ended", () => { if (bgmOK && bgmOn) bgm.play().catch(()=>{}); });
+});
+["play"].forEach(e => voice.addEventListener(e, () => $("eq").classList.add("on")));
+["pause","ended"].forEach(e => voice.addEventListener(e, () => $("eq").classList.remove("on")));
+// আমার voice একবারই: শেষ হলে চিহ্ন রেখে দেয়, তারপর ঘড়ির ধাপে (যেখানে সুর শুরু হয়)
+voice.addEventListener("ended", () => {
+  markDone("voice");
+  setTimeout(() => nextFrom("s-voice"), 2500);
+});
+
+/* ---------- দৃশ্য (scene) ব্যবস্থা ---------- */
+const order = ["s-envelope","s-cake","s-voice","s-counter","s-photos","s-reasons","s-song","s-final"];
+const darkScenes = new Set(["s-lock","s-cake","s-voice","s-counter","s-photos"]);
+let cur = -1;
+
+/* কেক কাটা আর আমার voice একবারই আসবে (reload দিলেও মনে রাখে) */
+const STORE_KEY = "bday26_done";
+if (params.has("reset")) { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+let done = {};
+if (!preview) { try { done = JSON.parse(localStorage.getItem(STORE_KEY) || "{}") || {}; } catch (e) { done = {}; } }
+function markDone(k) {
+  done[k] = 1;
+  if (!preview) { try { localStorage.setItem(STORE_KEY, JSON.stringify(done)); } catch (e) {} }
+}
+function isSkipped(id) {
+  if (id === "s-envelope" && started) return true;
+  if (id === "s-cake" && done.cake) return true;
+  if (id === "s-voice" && done.voice) return true;
+  const el = id === "s-voice" ? voice : id === "s-song" ? song : null;
+  return !!el && !!(el.error || el.networkState === 3);
+}
+// iPhone-এ পরে নিজে থেকে voice চালানোর অনুমতি আগেই নিয়ে রাখা
+let voiceUnlocked = false;
+function unlockVoice() {
+  if (voiceUnlocked || done.voice) return;
+  voiceUnlocked = true;
+  voice.muted = true;
+  const p = voice.play();
+  if (p && p.then) p.then(() => { voice.pause(); voice.currentTime = 0; voice.muted = false; }).catch(() => { voice.muted = false; });
+  else voice.muted = false;
+}
+// background সুরও একই কারণে আগেই (নিঃশব্দে) চালিয়ে থামিয়ে রাখা, যাতে পরে নিজে থেকে চালু হতে পারে
+function unlockBgm() {
+  if (!bgmOK) return;
+  const was = bgm.muted;
+  bgm.muted = true;
+  const p = bgm.play();
+  const restore = () => { bgm.pause(); bgm.currentTime = 0; bgm.muted = was; };
+  if (p && p.then) p.then(restore).catch(() => { bgm.muted = was; });
+  else bgm.muted = was;
+}
+function tryPlayVoice() {
+  const p = voice.play();
+  if (p && p.catch) p.catch(() => {});
+}
+function buildDots() { $("dots").innerHTML = order.map(() => "<i></i>").join(""); }
+function show(id) {
+  document.querySelectorAll(".scene").forEach(s => s.classList.toggle("active", s.id === id));
+  const idx = order.indexOf(id);
+  document.querySelectorAll("#dots i").forEach((d, i) => d.classList.toggle("on", i === idx));
+  $("dots").classList.toggle("hidden", idx < 0);
+  document.body.classList.toggle("dark", darkScenes.has(id));
+}
+function prevIndex() {
+  for (let j = cur - 1; j >= 0; j--) if (!isSkipped(order[j])) return j;
+  return -1;
+}
+function goTo(i, force) {
+  if (!force) while (i < order.length && isSkipped(order[i])) i++;
+  if (i >= order.length) return;
+  const leaving = order[cur];
+  if (leaving === "s-voice") { if (voice.currentTime > 5) markDone("voice"); voice.pause(); }
+  if (leaving === "s-song") song.pause();
+  cur = i;
+  const id = order[i];
+  show(id);
+  if (leaving === "s-counter" && id !== "s-counter") fadeBgm(CONFIG.bgmVolume);
+  if (id === "s-counter") {
+    // সুর খাম খোলার সময়ই শুরু হয়েছে, এই ধাপে শুধু টিক শোনার জন্য একটু নামে
+    if (!bgmOn) startBgm();
+    fadeBgm(CONFIG.counterVolume, 800);
+    secondTick();
+  }
+  if (id === "s-voice") tryPlayVoice();      // কেক শেষ হলে voice নিজে থেকে শুরু
+  if (id === "s-reasons") resetReasons();
+  if (id === "s-final") setTimeout(() => confetti(25), 600);
+  $("back").classList.toggle("hidden", prevIndex() < 0);
+}
+const next = () => goTo(cur + 1);
+const nextFrom = id => { if (order[cur] === id) next(); };   // একই ধাপ থেকে দু'বার এগোনো ঠেকায়
+document.querySelectorAll("[data-next]").forEach(b => b.addEventListener("click", next));
+$("cakeNext").onclick = () => nextFrom("s-cake");
+$("voiceNext").onclick = () => nextFrom("s-voice");
+$("back").onclick = () => { const j = prevIndex(); if (j >= 0) goTo(j, true); };
+
+/* ---------- 1. খাম ---------- */
+$("envelope").onclick = () => {
+  if (started) return;
+  started = true;
+  ctx();                                  // শব্দ চালুর অনুমতি আগেই নিয়ে রাখা
+  boostBgm();
+  $("envelope").classList.add("open");
+  $("envHint").textContent = "💌";
+  unlockVoice();                          // পরে voice নিজে থেকে চালানোর অনুমতি
+  setBgmVol(CONFIG.bgmVolume);
+  startBgm();                             // background সুর এখন থেকেই শুরু
+  sfxOpen();
+  fireworks(4);
+  for (let k = 0; k < 25; k++) setTimeout(hearts, k*70);
+  setTimeout(next, 2800);
+};
+
+/* ---------- 2. কেক (২১টা মোমবাতি) ---------- */
+const NS = "http://www.w3.org/2000/svg";
+function buildCake() {
+  const svg = $("cakeSvg");
+  const candleColors = ["#ffd1e1","#cfe9ff","#fff0b8","#d9ffd6","#e8d3ff"];
+  let s = `
+  <defs>
+    <linearGradient id="gB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f58fb4"/><stop offset="1" stop-color="#e0457b"/></linearGradient>
+    <linearGradient id="gT" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffb3cf"/><stop offset="1" stop-color="#f27aa5"/></linearGradient>
+    <radialGradient id="gF" cx="50%" cy="70%" r="60%"><stop offset="0" stop-color="#fff7b0"/><stop offset=".45" stop-color="#ffb52e"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gG" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="160" cy="268" rx="152" ry="16" fill="#efe6f5"/>
+  <ellipse cx="160" cy="263" rx="142" ry="12" fill="#d9c9e6"/>
+  <rect x="26" y="190" width="268" height="68" rx="10" fill="url(#gB)"/>
+  <ellipse cx="160" cy="190" rx="134" ry="20" fill="#ffc6da"/>
+  <rect x="48" y="120" width="224" height="72" fill="url(#gT)"/>
+  <ellipse cx="160" cy="192" rx="112" ry="14" fill="#f27aa5" opacity=".0"/>
+  <ellipse cx="160" cy="120" rx="112" ry="21" fill="#ffe0ec"/>`;
+  // ক্রিম ঝরে পড়া
+  for (let x = 62; x <= 258; x += 22) {
+    const h = 12 + ((x*7) % 13);
+    s += `<rect x="${x-6}" y="127" width="12" height="${h}" rx="6" fill="#fff6fa"/>`;
+  }
+  // নিচের স্তরে মুক্তো আর "21"
+  for (let x = 40; x <= 280; x += 16) s += `<circle cx="${x}" cy="252" r="4" fill="#fff" opacity=".9"/>`;
+  s += `<text x="160" y="232" text-anchor="middle" font-family="Pacifico, cursive" font-size="30" fill="#fff7d6" stroke="#c9a24a" stroke-width=".6">21</text>`;
+  // sprinkle
+  const sp = ["#7fd1ff","#ffe066","#9be28a","#c79bff","#fff"];
+  for (let i = 0; i < 26; i++) {
+    const x = 60 + (i*53 % 200), y = 150 + (i*37 % 34), r = (i*29) % 180;
+    s += `<rect x="${x}" y="${y}" width="7" height="2.4" rx="1.2" fill="${sp[i%5]}" transform="rotate(${r} ${x} ${y})"/>`;
+  }
+  // ২১টা মোমবাতি: পেছনের সারি ১১, সামনের সারি ১০
+  const rows = [{ y: 113, n: 11, x0: 62, dx: 19.6 }, { y: 126, n: 10, x0: 72, dx: 19.6 }];
+  let k = 0;
+  rows.forEach(r => {
+    for (let j = 0; j < r.n; j++) {
+      const x = r.x0 + j*r.dx, col = candleColors[k % 5], d = (k*0.043).toFixed(2);
+      s += `<g class="candle" data-i="${k}" data-x="${x.toFixed(1)}" data-y="${r.y - 30}">
+        <rect x="${x-9}" y="${r.y-42}" width="18" height="44" fill="transparent"/>
+        <circle cx="${x}" cy="${r.y-30}" r="13" fill="url(#gG)"/>
+        <rect x="${x-2.6}" y="${r.y-20}" width="5.2" height="21" rx="1.2" fill="${col}"/>
+        <rect x="${x-.5}" y="${r.y-24}" width=".9" height="5" fill="#6b4b3a"/>
+        <g class="fl" style="animation-delay:-${d}s"><ellipse cx="${x}" cy="${r.y-29}" rx="3.3" ry="6.4" fill="url(#gF)"/></g>
+      </g>`;
+      k++;
+    }
+  });
+  svg.innerHTML = s;
+  svg.addEventListener("click", e => {
+    const c = e.target.closest(".candle");
+    if (c) snuff(c);
+  });
+}
+let lit = 21, blownAll = false;
+function snuff(c) {
+  if (c.classList.contains("out")) return;
+  c.classList.add("out");
+  const sm = document.createElementNS(NS, "circle");
+  sm.setAttribute("cx", c.dataset.x); sm.setAttribute("cy", c.dataset.y);
+  sm.setAttribute("r", "3"); sm.setAttribute("fill", "rgba(225,225,238,.75)");
+  sm.setAttribute("class", "smoke");
+  $("cakeSvg").appendChild(sm);
+  setTimeout(() => sm.remove(), 2300);
+  lit--;
+  $("cakeGlow").style.setProperty("--lit", (lit/21).toFixed(2));
+  if (lit <= 0) allOut();
+}
+function blowOut() {
+  stopMic();
+  const cs = [...document.querySelectorAll("#cakeSvg .candle")].sort(() => Math.random() - .5);
+  cs.forEach((c, i) => setTimeout(() => snuff(c), i*55));
+}
+function allOut() {
+  if (blownAll) return;
+  blownAll = true;
+  markDone("cake");
+  stopMic();
+  $("blowArea").classList.add("hidden");
+  setTimeout(() => {
+    chime();
+    fireworks(9);
+    confetti(80);
+    $("hbd").classList.remove("hidden");
+    $("cakeNext").classList.remove("hidden");
+    setTimeout(() => nextFrom("s-cake"), 6500);   // উৎসব দেখা শেষে নিজে থেকেই voice-এর ধাপে
+  }, 700);
+}
+$("blowBtn").onclick = () => { unlockVoice(); blowOut(); };
+
+/* মাইকে সত্যিকারের ফুঁ ধরা */
+let micStream = null, micDone = true;
+function stopMic() {
+  micDone = true;
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+}
+$("micBtn").onclick = async () => {
+  unlockVoice();
+  if (!micDone) return;
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+  } catch (e) {
+    $("blowStatus").textContent = "মাইক পাওয়া গেল না, তাই পাশের button-এ চাপ দাও 👆";
+    return;
+  }
+  micDone = false;
+  const c = ctx(), src = c.createMediaStreamSource(micStream), an = c.createAnalyser();
+  an.fftSize = 1024; src.connect(an);
+  const buf = new Uint8Array(an.fftSize);
+  const t0 = performance.now(); let base = 0, loud = 0;
+  $("blowStatus").textContent = "শুনছি... মাইকের কাছে মুখ এনে জোরে ফুঁ দাও 🌬️";
+  (function loop() {
+    if (micDone) return;
+    an.getByteTimeDomainData(buf);
+    let sum = 0; for (const v of buf) { const x = (v - 128)/128; sum += x*x; }
+    const rms = Math.sqrt(sum/buf.length), el = performance.now() - t0;
+    if (el < 900) base = Math.max(base, rms);
+    else {
+      const th = Math.max(0.24, base*3);
+      loud = rms > th ? loud + 1 : Math.max(0, loud - 1);
+      if (loud > 12) { blowOut(); return; }
+    }
+    requestAnimationFrame(loop);
+  })();
+};
+
+/* ---------- 4. ঘড়ি + counter + টিক শব্দ ---------- */
+(function marks() {
+  let m = "";
+  for (let i = 0; i < 12; i++) m += `<line y1="-42" y2="${i%3 ? -38 : -35}" stroke="#ffc2da" stroke-width="${i%3 ? 1 : 2}" transform="rotate(${i*30})"/>`;
+  $("marks").innerHTML = m;
+})();
+const startDate = new Date(CONFIG.startDate + "T00:00:00+06:00");
+let tock = false;
+function secondTick() {
+  const now = new Date();
+  // counter
+  const diff = now - startDate;
+  const d = Math.floor(diff/86400000), h = Math.floor(diff/3600000)%24, m = Math.floor(diff/60000)%60, s = Math.floor(diff/1000)%60;
+  $("counter").innerHTML = `<div><b>${d}</b>দিন</div><div><b>${h}</b>ঘণ্টা</div><div><b>${m}</b>মিনিট</div><div><b>${s}</b>সেকেন্ড</div>`;
+  // ঘড়ির কাঁটা
+  const hh = now.getHours()%12, mm = now.getMinutes(), ss = now.getSeconds();
+  $("hH").setAttribute("transform", `rotate(${hh*30 + mm*.5})`);
+  $("hM").setAttribute("transform", `rotate(${mm*6 + ss*.1})`);
+  $("hS").setAttribute("transform", `rotate(${ss*6})`);
+  // টিক-টক শব্দ (শুধু এই ধাপে)
+  if (order[cur] === "s-counter") { tock = !tock; tickSound(tock); }
+}
+setInterval(secondTick, 1000);
+
+/* ---------- 5. ছবির দেয়াল ---------- */
+function buildWall() {
+  const rows = [[0,1,2],[3,4,5],[6,7,8]];
+  $("wall").innerHTML = rows.map((r, ri) => `
+    <div class="string">
+      <svg class="wire" viewBox="0 0 400 30" preserveAspectRatio="none">
+        <path d="M0 5 Q200 28 400 5" fill="none" stroke="#6f5d80" stroke-width="1.5"/>
+        <path class="bulbs" d="M0 5 Q200 28 400 5" fill="none" stroke="#ffd36e" stroke-width="6" stroke-linecap="round" stroke-dasharray="0 24"/>
+      </svg>
+      <div class="polas">${r.map(i => {
+        const t = CONFIG.timeline[i], rot = ((i%3) - 1)*2.2 + (ri%2 ? 1 : -1)*0.8;
+        return `<button class="pola" data-i="${i}" style="--r:${rot.toFixed(1)}deg;animation-delay:-${(i*0.7).toFixed(1)}s">
+          <img src="${t.img}" alt="" loading="lazy"><span>${t.short}</span></button>`;
+      }).join("")}</div>
+    </div>`).join("");
+  $("wall").addEventListener("click", e => {
+    const p = e.target.closest(".pola");
+    if (p) openLb(+p.dataset.i);
+  });
+}
+let lbI = 0;
+function openLb(i) {
+  const n = CONFIG.timeline.length;
+  lbI = (i + n) % n;
+  const t = CONFIG.timeline[lbI];
+  $("lbImg").src = t.img; $("lbDate").textContent = t.date; $("lbText").textContent = t.text;
+  $("lb").classList.remove("hidden");
+}
+$("lbClose").onclick = () => $("lb").classList.add("hidden");
+$("lb").addEventListener("click", e => { if (e.target.id === "lb") $("lb").classList.add("hidden"); });
+$("lbPrev").onclick = () => openLb(lbI - 1);
+$("lbNext").onclick = () => openLb(lbI + 1);
+
+/* ---------- 6. কারণ ---------- */
+let r = 0;
+function resetReasons() {
+  r = 0;
+  $("reason").textContent = "নিচের button-এ চাপো";
+  $("reason").style.opacity = 1;
+  $("count").textContent = "";
+  $("reasonBtn").textContent = "প্রথম কারণ";
+}
+$("reasonBtn").onclick = () => {
+  const n = CONFIG.reasons.length;
+  if (r >= n) { next(); return; }
+  $("reason").style.opacity = 0;
+  setTimeout(() => {
+    $("reason").textContent = CONFIG.reasons[r];
+    $("reason").style.opacity = 1;
+    $("count").textContent = (r + 1) + " / " + n;
+    r++;
+    $("reasonBtn").textContent = r < n ? "পরের কারণ" : "পরের ধাপ →";
+  }, 250);
+  for (let k = 0; k < 5; k++) hearts();
+};
+
+/* ---------- 8. চিঠি ---------- */
+$("finalBtn").onclick = () => {
+  $("finalBtn").classList.add("hidden");
+  $("finalCard").classList.remove("hidden");
+  $("final-msg").textContent = CONFIG.finalMessage;
+  $("replayBtn").classList.remove("hidden");
+  confetti(80);
+};
+// কেক আর voice বাদে বাকি সবটা আবার দেখা যায়
+$("replayBtn").onclick = () => goTo(order.indexOf("s-counter"), true);
+
+/* ---------- শুরু / লক ---------- */
+buildDots(); buildCake(); buildWall();
+setInterval(() => { if (started) hearts(); }, 1600);
+
+const unlock = new Date(CONFIG.unlockAt).getTime();
+if (preview || Date.now() >= unlock) {
+  goTo(0);
+  const jump = parseInt(params.get("scene"), 10);   // test: ?preview&scene=3
+  if (preview && jump > 0) { started = true; goTo(jump); }
+} else {
+  show("s-lock");
+  // লক-এর countdown-এও ঘড়ির টিক (ব্রাউজার নিজে থেকে শব্দ চালাতে দেয় না, তাই একবার button চাপতে হবে)
+  let lockTick = false, lockTock = false;
+  $("lockSound").onclick = () => {
+    ctx();
+    lockTick = !lockTick;
+    $("lockSound").textContent = lockTick ? "🔕 টিক টিক বন্ধ করো" : "🔔 টিক টিক শব্দ চালু করো";
+    if (lockTick) tickSound(true);
+  };
+  const t = setInterval(() => {
+    const left = unlock - Date.now();
+    if (left <= 0) { clearInterval(t); location.reload(); return; }
+    if (lockTick) { lockTock = !lockTock; tickSound(lockTock); }
+    const d = Math.floor(left/86400000), h = Math.floor(left/3600000)%24,
+          m = Math.floor(left/60000)%60, s = Math.floor(left/1000)%60;
+    $("timer").innerHTML =
+      `<div><b>${d}</b>দিন</div><div><b>${h}</b>ঘণ্টা</div><div><b>${m}</b>মিনিট</div><div><b>${s}</b>সেকেন্ড</div>`;
+  }, 1000);
+}
+</script>
+</body>
+</html>
