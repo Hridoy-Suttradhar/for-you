@@ -57,13 +57,17 @@
   body.dark #dots i { background: rgba(255,255,255,.3); }
   body.dark #dots i.on { background: #ffc2da; }
 
-  #mute { position: fixed; top: 14px; right: 14px; z-index: 6; width: 42px; height: 42px; border-radius: 50%; border: 0;
+  #mute { right: 14px; }
+  #back { left: 14px; }
+  #mute, #back { position: fixed; top: 14px; z-index: 6; width: 42px; height: 42px; border-radius: 50%; border: 0;
           background: rgba(255,255,255,.85); font-size: 1.2rem; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.12); }
 
   /* lock */
   .timer { display: flex; gap: 8px; justify-content: center; margin: 24px 0; }
   .timer div { background: var(--card); border-radius: 14px; padding: 12px 8px; min-width: 66px; font-size: .85rem; }
   .timer b { display: block; font-size: 1.8rem; color: var(--accent); }
+  .night .timer div { background: rgba(255,255,255,.1); }
+  .night .timer b { color: #ffc2da; }
 
   /* envelope */
   .envelope { width: 230px; height: 150px; margin: 22px auto; position: relative; background: #f7c6d8; border-radius: 8px;
@@ -150,13 +154,15 @@
 <div id="nightBg"></div>
 <canvas id="fx"></canvas>
 <button id="mute" class="hidden" aria-label="গান বন্ধ/চালু">🔊</button>
+<button id="back" class="hidden" aria-label="আগের ধাপ">←</button>
 <div id="dots"></div>
 
 <!-- 0. LOCK -->
-<div class="scene" id="s-lock"><div class="inner">
+<div class="scene night" id="s-lock"><div class="inner">
   <h1>একটু অপেক্ষা... 🤫</h1>
   <p style="margin-top:12px">বৃষভানু, তোমার জন্য একটা surprise আছে।<br>২৬ নভেম্বর রাত ১২টায় খুলবে।</p>
   <div class="timer" id="timer"></div>
+  <button class="btn ghost" id="lockSound">🔔 টিক টিক শব্দ চালু করো</button>
 </div></div>
 
 <!-- 1. খাম -->
@@ -180,18 +186,18 @@
     <div id="blowStatus"></div>
   </div>
   <h1 id="hbd" class="hidden">শুভ জন্মদিন,<br>বৃষভানু 🎂</h1>
-  <button class="btn hidden" id="cakeNext" data-next>পরের ধাপ →</button>
+  <button class="btn hidden" id="cakeNext">পরের ধাপ →</button>
 </div></div>
 
 <!-- 3. আমার voice -->
 <div class="scene night" id="s-voice"><div class="inner">
   <h2>আমার গলায় একটা ছোট্ট কথা 🎧</h2>
   <div class="card">
-    <p>Headphone লাগিয়ে নাও, তারপর play চাপো।</p>
+    <p>Headphone লাগিয়ে শোনো 🎧<br>নিজে থেকে না চললে play চাপো।</p>
     <div class="eq" id="eq"><i></i><i></i><i></i><i></i><i></i></div>
     <audio id="voice" controls preload="metadata" src="audio/voice.mp3"></audio>
   </div>
-  <button class="btn" data-next>পরের ধাপ →</button>
+  <button class="btn" id="voiceNext">পরের ধাপ →</button>
 </div></div>
 
 <!-- 4. ঘড়ি + counter -->
@@ -243,6 +249,7 @@
   <h2>শেষে একটা কথা...</h2>
   <button class="btn" id="finalBtn">Tai? 🙈</button>
   <div class="card hidden" id="finalCard" style="margin-top:20px"><p id="final-msg"></p></div>
+  <div><button class="btn ghost hidden" id="replayBtn">↺ আবার দেখো</button></div>
 </div></div>
 
 <!-- lightbox -->
@@ -264,7 +271,7 @@
 const CONFIG = {
   startDate: "2025-08-06",
   unlockAt: "2026-11-26T00:00:00+06:00",   // জন্মদিনের রাত ১২:০০ (বাংলাদেশ সময়)
-  bgmVolume: 0.22,                          // background গানের জোর (০ থেকে ১)
+  bgmVolume: 1, counterVolume: 0.5,                          // background গানের জোর (০ থেকে ১)
 
   timeline: [
     { img: "photos/1.jpg", short: "সেই কনসার্ট", date: "Airtel Adda Concert, চবি",
@@ -410,15 +417,29 @@ function chime() {
 
 /* ---------- audio ফাইল ---------- */
 const bgm = $("bgm"), song = $("song"), voice = $("voice");
-let bgmOK = true, started = false;
+let bgmOK = true, started = false, bgmOn = false;
 bgm.volume = CONFIG.bgmVolume;
 bgm.addEventListener("error", () => { bgmOK = false; $("mute").classList.add("hidden"); }, true);
 const setBgmVol = v => { bgm.volume = v; };
 
 function startBgm() {
   if (!bgmOK) return;
-  bgm.play().then(() => $("mute").classList.remove("hidden")).catch(() => {});
+  bgmOn = true;
+  bgm.play().catch(() => {});
 }
+bgm.addEventListener("playing", () => $("mute").classList.remove("hidden"));
+function fadeBgm(target, ms = 1600) {
+  clearInterval(fadeBgm.t);
+  const from = bgm.volume, steps = 16, dt = ms/steps; let i = 0;
+  fadeBgm.t = setInterval(() => {
+    i++; bgm.volume = Math.min(1, Math.max(0, from + (target - from)*i/steps));
+    if (i >= steps) clearInterval(fadeBgm.t);
+  }, dt);
+}
+// কোনো কারণে সুর না চললে পরের ছোঁয়ায় চালু হবে
+document.addEventListener("click", () => {
+  if (bgmOn && bgm.paused && !song.playing && !voice.playing) bgm.play().catch(() => {});
+});
 $("mute").onclick = () => {
   muted = !muted;
   bgm.muted = muted;
@@ -428,20 +449,61 @@ Object.defineProperty(HTMLMediaElement.prototype, "playing", { get() { return !t
 // ওর গান বা আমার voice চললে background সুর থামবে, শেষ হলে আবার চলবে
 [song, voice].forEach(a => {
   a.addEventListener("play",  () => bgm.pause());
-  a.addEventListener("pause", () => { if (bgmOK && started && !song.playing && !voice.playing) bgm.play().catch(()=>{}); });
-  a.addEventListener("ended", () => { if (bgmOK && started) bgm.play().catch(()=>{}); });
+  a.addEventListener("pause", () => { if (bgmOK && bgmOn && !song.playing && !voice.playing) bgm.play().catch(()=>{}); });
+  a.addEventListener("ended", () => { if (bgmOK && bgmOn) bgm.play().catch(()=>{}); });
 });
 ["play"].forEach(e => voice.addEventListener(e, () => $("eq").classList.add("on")));
 ["pause","ended"].forEach(e => voice.addEventListener(e, () => $("eq").classList.remove("on")));
+// আমার voice একবারই: শেষ হলে চিহ্ন রেখে দেয়, তারপর ঘড়ির ধাপে (যেখানে সুর শুরু হয়)
+voice.addEventListener("ended", () => {
+  markDone("voice");
+  setTimeout(() => nextFrom("s-voice"), 2500);
+});
 
 /* ---------- দৃশ্য (scene) ব্যবস্থা ---------- */
 const order = ["s-envelope","s-cake","s-voice","s-counter","s-photos","s-reasons","s-song","s-final"];
-const darkScenes = new Set(["s-cake","s-voice","s-counter","s-photos"]);
+const darkScenes = new Set(["s-lock","s-cake","s-voice","s-counter","s-photos"]);
 let cur = -1;
 
-function isMissing(id) {
+/* কেক কাটা আর আমার voice একবারই আসবে (reload দিলেও মনে রাখে) */
+const STORE_KEY = "bday26_done";
+if (params.has("reset")) { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+let done = {};
+if (!preview) { try { done = JSON.parse(localStorage.getItem(STORE_KEY) || "{}") || {}; } catch (e) { done = {}; } }
+function markDone(k) {
+  done[k] = 1;
+  if (!preview) { try { localStorage.setItem(STORE_KEY, JSON.stringify(done)); } catch (e) {} }
+}
+function isSkipped(id) {
+  if (id === "s-envelope" && started) return true;
+  if (id === "s-cake" && done.cake) return true;
+  if (id === "s-voice" && done.voice) return true;
   const el = id === "s-voice" ? voice : id === "s-song" ? song : null;
-  return !!el && (el.error || el.networkState === 3);
+  return !!el && !!(el.error || el.networkState === 3);
+}
+// iPhone-এ পরে নিজে থেকে voice চালানোর অনুমতি আগেই নিয়ে রাখা
+let voiceUnlocked = false;
+function unlockVoice() {
+  if (voiceUnlocked || done.voice) return;
+  voiceUnlocked = true;
+  voice.muted = true;
+  const p = voice.play();
+  if (p && p.then) p.then(() => { voice.pause(); voice.currentTime = 0; voice.muted = false; }).catch(() => { voice.muted = false; });
+  else voice.muted = false;
+}
+// background সুরও একই কারণে আগেই (নিঃশব্দে) চালিয়ে থামিয়ে রাখা, যাতে পরে নিজে থেকে চালু হতে পারে
+function unlockBgm() {
+  if (!bgmOK) return;
+  const was = bgm.muted;
+  bgm.muted = true;
+  const p = bgm.play();
+  const restore = () => { bgm.pause(); bgm.currentTime = 0; bgm.muted = was; };
+  if (p && p.then) p.then(restore).catch(() => { bgm.muted = was; });
+  else bgm.muted = was;
+}
+function tryPlayVoice() {
+  const p = voice.play();
+  if (p && p.catch) p.catch(() => {});
 }
 function buildDots() { $("dots").innerHTML = order.map(() => "<i></i>").join(""); }
 function show(id) {
@@ -451,21 +513,36 @@ function show(id) {
   $("dots").classList.toggle("hidden", idx < 0);
   document.body.classList.toggle("dark", darkScenes.has(id));
 }
-function goTo(i) {
-  while (i < order.length && isMissing(order[i])) i++;
+function prevIndex() {
+  for (let j = cur - 1; j >= 0; j--) if (!isSkipped(order[j])) return j;
+  return -1;
+}
+function goTo(i, force) {
+  if (!force) while (i < order.length && isSkipped(order[i])) i++;
   if (i >= order.length) return;
   const leaving = order[cur];
-  if (leaving === "s-voice") voice.pause();
+  if (leaving === "s-voice") { if (voice.currentTime > 5) markDone("voice"); voice.pause(); }
   if (leaving === "s-song") song.pause();
-  if (leaving === "s-counter") setBgmVol(CONFIG.bgmVolume);
   cur = i;
   const id = order[i];
   show(id);
-  if (id === "s-counter") { setBgmVol(0.09); secondTick(); }   // টিক শোনা যাওয়ার জন্য গান আস্তে
+  if (leaving === "s-counter" && id !== "s-counter") fadeBgm(CONFIG.bgmVolume);
+  if (id === "s-counter") {
+    // background সুর শুরু হয় এই ধাপ থেকেই, এরপর শেষ পর্যন্ত loop-এ চলে
+    if (!bgmOn) { setBgmVol(CONFIG.counterVolume); startBgm(); } else fadeBgm(CONFIG.counterVolume, 800);
+    secondTick();
+  }
+  if (id === "s-voice") tryPlayVoice();      // কেক শেষ হলে voice নিজে থেকে শুরু
+  if (id === "s-reasons") resetReasons();
   if (id === "s-final") setTimeout(() => confetti(25), 600);
+  $("back").classList.toggle("hidden", prevIndex() < 0);
 }
 const next = () => goTo(cur + 1);
+const nextFrom = id => { if (order[cur] === id) next(); };   // একই ধাপ থেকে দু'বার এগোনো ঠেকায়
 document.querySelectorAll("[data-next]").forEach(b => b.addEventListener("click", next));
+$("cakeNext").onclick = () => nextFrom("s-cake");
+$("voiceNext").onclick = () => nextFrom("s-voice");
+$("back").onclick = () => { const j = prevIndex(); if (j >= 0) goTo(j, true); };
 
 /* ---------- 1. খাম ---------- */
 $("envelope").onclick = () => {
@@ -474,7 +551,8 @@ $("envelope").onclick = () => {
   ctx();                                  // শব্দ চালুর অনুমতি আগেই নিয়ে রাখা
   $("envelope").classList.add("open");
   $("envHint").textContent = "💌";
-  startBgm();
+  unlockVoice();
+  unlockBgm();
   for (let k = 0; k < 15; k++) setTimeout(hearts, k*80);
   setTimeout(next, 1400);
 };
@@ -556,6 +634,7 @@ function blowOut() {
 function allOut() {
   if (blownAll) return;
   blownAll = true;
+  markDone("cake");
   stopMic();
   $("blowArea").classList.add("hidden");
   setTimeout(() => {
@@ -564,18 +643,19 @@ function allOut() {
     confetti(80);
     $("hbd").classList.remove("hidden");
     $("cakeNext").classList.remove("hidden");
+    setTimeout(() => nextFrom("s-cake"), 6500);   // উৎসব দেখা শেষে নিজে থেকেই voice-এর ধাপে
   }, 700);
 }
-$("blowBtn").onclick = blowOut;
+$("blowBtn").onclick = () => { unlockVoice(); blowOut(); };
 
 /* মাইকে সত্যিকারের ফুঁ ধরা */
 let micStream = null, micDone = true;
 function stopMic() {
   micDone = true;
   if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
-  setBgmVol(CONFIG.bgmVolume);
 }
 $("micBtn").onclick = async () => {
+  unlockVoice();
   if (!micDone) return;
   try {
     micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
@@ -584,7 +664,6 @@ $("micBtn").onclick = async () => {
     return;
   }
   micDone = false;
-  setBgmVol(0.05);
   const c = ctx(), src = c.createMediaStreamSource(micStream), an = c.createAnalyser();
   an.fftSize = 1024; src.connect(an);
   const buf = new Uint8Array(an.fftSize);
@@ -664,16 +743,23 @@ $("lbNext").onclick = () => openLb(lbI + 1);
 
 /* ---------- 6. কারণ ---------- */
 let r = 0;
+function resetReasons() {
+  r = 0;
+  $("reason").textContent = "নিচের button-এ চাপো";
+  $("reason").style.opacity = 1;
+  $("count").textContent = "";
+  $("reasonBtn").textContent = "প্রথম কারণ";
+}
 $("reasonBtn").onclick = () => {
   const n = CONFIG.reasons.length;
+  if (r >= n) { next(); return; }
   $("reason").style.opacity = 0;
   setTimeout(() => {
     $("reason").textContent = CONFIG.reasons[r];
     $("reason").style.opacity = 1;
     $("count").textContent = (r + 1) + " / " + n;
     r++;
-    if (r < n) $("reasonBtn").textContent = "পরের কারণ";
-    else { $("reasonBtn").textContent = "পরের ধাপ →"; $("reasonBtn").onclick = next; }
+    $("reasonBtn").textContent = r < n ? "পরের কারণ" : "পরের ধাপ →";
   }, 250);
   for (let k = 0; k < 5; k++) hearts();
 };
@@ -683,8 +769,11 @@ $("finalBtn").onclick = () => {
   $("finalBtn").classList.add("hidden");
   $("finalCard").classList.remove("hidden");
   $("final-msg").textContent = CONFIG.finalMessage;
+  $("replayBtn").classList.remove("hidden");
   confetti(80);
 };
+// কেক আর voice বাদে বাকি সবটা আবার দেখা যায়
+$("replayBtn").onclick = () => goTo(order.indexOf("s-counter"), true);
 
 /* ---------- শুরু / লক ---------- */
 buildDots(); buildCake(); buildWall();
@@ -697,9 +786,18 @@ if (preview || Date.now() >= unlock) {
   if (preview && jump > 0) { started = true; goTo(jump); }
 } else {
   show("s-lock");
+  // লক-এর countdown-এও ঘড়ির টিক (ব্রাউজার নিজে থেকে শব্দ চালাতে দেয় না, তাই একবার button চাপতে হবে)
+  let lockTick = false, lockTock = false;
+  $("lockSound").onclick = () => {
+    ctx();
+    lockTick = !lockTick;
+    $("lockSound").textContent = lockTick ? "🔕 টিক টিক বন্ধ করো" : "🔔 টিক টিক শব্দ চালু করো";
+    if (lockTick) tickSound(true);
+  };
   const t = setInterval(() => {
     const left = unlock - Date.now();
     if (left <= 0) { clearInterval(t); location.reload(); return; }
+    if (lockTick) { lockTock = !lockTock; tickSound(lockTock); }
     const d = Math.floor(left/86400000), h = Math.floor(left/3600000)%24,
           m = Math.floor(left/60000)%60, s = Math.floor(left/1000)%60;
     $("timer").innerHTML =
